@@ -78,8 +78,10 @@ jelenik meg — így az Elementor HTML-widgetjébe illesztve a honlap saját ker
 </script>
 ```
 
-A script nem kötelező: nélküle a `height` fix marad, csak az ablak átméretezésekor nem
-igazodik. A kalkulátor magától küldi a magasságát minden számítás után.
+A scriptet érdemes bent hagyni. A kalkulátor magától küldi a magasságát minden számítás után,
+így az iframe pontosan akkora lesz, amekkora kell. Nélküle a fix `height` marad érvényben —
+az asztali, kétoszlopos elrendezéshez ~1300 px elég, de mobilon egy oszlopba rendeződik és
+~2600 px kell, különben elvágja az alját.
 
 ## Ellenőrzés
 
