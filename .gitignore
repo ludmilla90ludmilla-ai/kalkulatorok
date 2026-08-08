@@ -1,0 +1,17 @@
+# Claude Code helyi (gépfüggő) beállításai
+.claude/settings.local.json
+
+# Windows / OneDrive
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Ideiglenes fájlok
+~$*
+*.tmp
+*.bak
+
+# macOS
+.DS_Store

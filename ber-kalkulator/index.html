@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bér- és jövedelemkalkulátor 2026 – Tamás Viktória</title>
+<meta name="description" content="Bruttó bérből nettó, nettóból bruttó és teljes bérköltség a 2026-os magyar szabályok szerint, minden adóalap-kedvezménnyel.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Montserrat:wght@400;600;700&family=Piazzolla:wght@400;700&display=swap&subset=latin-ext" rel="stylesheet">
+<link rel="stylesheet" href="../assets/viktoriawp.css">
+<style>
+  /* ---------- A kalkulátor saját elemei ---------- */
+
+  .kalk-lead { max-width: 60ch; }
+
+  .kalk-munkaterulet {
+    display: grid;
+    gap: 40px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  @media (max-width: 899px) {
+    .kalk-munkaterulet { grid-template-columns: minmax(0, 1fr); gap: 30px; }
+  }
+
+  /* Iránykapcsoló */
+  .kalk-irany { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; }
+  .kalk-irany .vwp-btn { padding: 13px 22px; }
+
+  /* Mezőcsoportok */
+  .kalk-mezok { display: grid; gap: 18px; }
+  .kalk-mezok--parban { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+
+  .kalk-sug {
+    display: block;
+    margin-top: 5px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--vwp-text);
+  }
+
+  .kalk-input--fo { font-size: 22px; font-weight: 600; padding: 14px 16px; }
+
+  /* Jelölőnégyzetek */
+  .kalk-kapcsolo { display: flex; gap: 11px; align-items: flex-start; }
+  .kalk-kapcsolo input { margin: 4px 0 0; width: 18px; height: 18px; accent-color: var(--vwp-primary); flex: none; }
+  .kalk-kapcsolo label { font-size: 15px; font-weight: 600; color: var(--vwp-ink); cursor: pointer; }
+
+  .kalk-blokk { margin-top: 40px; }
+  .kalk-blokk > h2 { font-size: 22px; line-height: 30px; margin-bottom: 18px; }
+
+  /* ---------- Eredménykártya ---------- */
+
+  .kalk-eredmeny {
+    background: var(--vwp-lavender);
+    border-radius: var(--vwp-radius-card);
+    padding: 36px 34px;
+    position: sticky;
+    top: 90px;
+  }
+  @media (max-width: 899px) { .kalk-eredmeny { position: static; padding: 28px 24px; } }
+
+  .kalk-fooszeg__cimke {
+    font-family: var(--vwp-font-accent);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--vwp-primary);
+  }
+  .kalk-fooszeg__ertek {
+    font-family: var(--vwp-font-display);
+    font-size: 46px;
+    line-height: 1.15;
+    color: var(--vwp-ink);
+    font-variant-numeric: tabular-nums;
+    margin: 2px 0 0;
+  }
+  @media (max-width: 480px) { .kalk-fooszeg__ertek { font-size: 34px; } }
+
+  .kalk-tetelek { margin: 26px 0 0; }
+  .kalk-tetelek h3 {
+    font-family: var(--vwp-font-body);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--vwp-primary);
+    margin: 0 0 10px;
+  }
+  .kalk-tetelek + .kalk-tetelek { border-top: 1px solid var(--vwp-border); padding-top: 22px; margin-top: 22px; }
+
+  .kalk-sor {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 5px 0;
+    font-size: 15px;
+  }
+  .kalk-sor span:last-child { font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 600; color: var(--vwp-ink); }
+  .kalk-sor--kiemelt { font-weight: 700; }
+  .kalk-sor--kiemelt span:first-child { color: var(--vwp-ink); }
+  .kalk-sor--halvany span { color: var(--vwp-text); font-weight: 400; }
+
+  .kalk-megjegyzes {
+    margin: 22px 0 0;
+    padding: 14px 16px;
+    background: #fff;
+    border-radius: var(--vwp-radius-btn);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .kalk-megjegyzes strong { color: var(--vwp-primary); }
+  .kalk-megjegyzes:empty { display: none; }
+
+  .kalk-muveletek { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+  .kalk-muveletek .vwp-btn { padding: 12px 20px; }
+
+  .kalk-jogi { font-size: 13px; line-height: 1.6; color: var(--vwp-text); max-width: 80ch; }
+
+  /* ---------- Beágyazott (?embed=1) mód ---------- */
+
+  .beagyazva .kalk-csak-onalloan { display: none; }
+  .beagyazva body { background: transparent; }
+  .beagyazva .kalk-fo { padding-block: 0; }
+  .beagyazva .kalk-eredmeny { top: 10px; }
+
+  /* ---------- Nyomtatás ---------- */
+
+  @media print {
+    .vwp-header, .vwp-footer, .kalk-muveletek, .kalk-irany { display: none !important; }
+    .kalk-munkaterulet { grid-template-columns: 1fr; }
+    .kalk-eredmeny { position: static; background: #fff; border: 1px solid var(--vwp-border); }
+    .vwp-section { padding-block: 0; }
+    a { text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="vwp-header kalk-csak-onalloan">
+  <div class="vwp-header__inner">
+    <a class="vwp-logo" href="https://viktoriawp.eu/">Tamás Viktória</a>
+    <nav class="vwp-nav">
+      <a href="https://viktoriawp.eu/">Főoldal</a>
+      <a href="https://viktoriawp.eu/blog/">Blog</a>
+      <a href="../" aria-current="page">Kalkulátorok</a>
+      <a href="https://viktoriawp.eu/kapcsolat/">Kapcsolat</a>
+    </nav>
+  </div>
+</header>
+
+<section class="vwp-section kalk-csak-onalloan" style="padding-bottom:0;">
+  <div class="vwp-container">
+    <span class="vwp-eyebrow">Kalkulátorok</span>
+    <h1>Bér- és jövedelemkalkulátor</h1>
+    <p class="kalk-lead">
+      A 2026-os szabályok szerint számol: bruttó bérből nettót, vagy visszafelé, egy megcélzott
+      nettóból bruttót — az adóalap-kedvezményekkel és a munkáltatói teherrel együtt.
+    </p>
+  </div>
+</section>
+
+<section class="vwp-section kalk-fo">
+  <div class="vwp-container">
+    <div class="kalk-munkaterulet">
+
+      <!-- ---------------- Űrlap ---------------- -->
+      <form id="urlap" autocomplete="off">
+
+        <div class="kalk-irany" role="group" aria-label="Számítás iránya">
+          <button type="button" class="vwp-btn" data-irany="brutto" aria-pressed="true">Bruttóból nettót</button>
+          <button type="button" class="vwp-btn vwp-btn--outline" data-irany="netto" aria-pressed="false">Nettóból bruttót</button>
+        </div>
+
+        <div class="kalk-mezok">
+          <div>
+            <label class="vwp-label" for="fooszeg" id="fooszegCimke">Havi bruttó bér</label>
+            <input class="vwp-input kalk-input--fo" id="fooszeg" name="fooszeg" type="text"
+                   inputmode="numeric" value="500 000" aria-describedby="fooszegSug">
+            <span class="kalk-sug" id="fooszegSug">Forintban, havi összeg.</span>
+          </div>
+
+          <div id="nemRendszeresMezo">
+            <label class="vwp-label" for="nemRendszeres">Havi nem rendszeres jövedelem</label>
+            <input class="vwp-input" id="nemRendszeres" name="nemRendszeres" type="text"
+                   inputmode="numeric" value="0" aria-describedby="nemRendszeresSug">
+            <span class="kalk-sug" id="nemRendszeresSug">Jutalom, bónusz, túlóra — ami az adott hónapban a bér mellé jön.</span>
+          </div>
+        </div>
+
+        <div class="kalk-blokk">
+          <h2>Kedvezmények</h2>
+
+          <div class="kalk-mezok">
+            <div>
+              <label class="vwp-label" for="anyak">Anyák kedvezménye</label>
+              <select class="vwp-select" id="anyak" name="anyak">
+                <option value="nincs" selected>Nem veszem igénybe</option>
+                <option value="netak">Négy vagy több gyermeket nevelő anya (NÉTAK)</option>
+                <option value="harom">Három gyermeket nevelő anya</option>
+                <option value="ketto">Két gyermeket nevelő anya (2026-ban 40 év alatt)</option>
+                <option value="anya30">30 év alatti anya</option>
+              </select>
+              <span class="kalk-sug">
+                A NÉTAK és a két-, illetve háromgyermekes kedvezmény a teljes munkajövedelmet mentesíti
+                az szja alól. A 30 év alatti anyák kedvezménye havi 715 765 Ft-ig jár.
+              </span>
+            </div>
+
+            <div class="kalk-kapcsolo">
+              <input type="checkbox" id="fiatal25" name="fiatal25">
+              <label for="fiatal25">25 év alatti fiatalok kedvezménye
+                <span class="kalk-sug">Havi 715 765 Ft-ig mentes az szja alól.</span>
+              </label>
+            </div>
+
+            <div class="kalk-kapcsolo">
+              <input type="checkbox" id="szemelyi" name="szemelyi">
+              <label for="szemelyi">Személyi kedvezmény
+                <span class="kalk-sug">Súlyos fogyatékosság vagy tartós betegség esetén: havi 107 600 Ft adóalap-kedvezmény.</span>
+              </label>
+            </div>
+
+            <div class="kalk-kapcsolo">
+              <input type="checkbox" id="elsoHazas" name="elsoHazas">
+              <label for="elsoHazas">Első házasok kedvezménye
+                <span class="kalk-sug">A házasságkötést követő 24 hónapban: havi 33 335 Ft adóalap-kedvezmény.</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="kalk-blokk">
+          <h2>Családi kedvezmény</h2>
+
+          <div class="kalk-mezok kalk-mezok--parban">
+            <div>
+              <label class="vwp-label" for="kedvezmenyezett">Kedvezményezett eltartott</label>
+              <input class="vwp-input" id="kedvezmenyezett" name="kedvezmenyezett" type="number" min="0" max="20" step="1" value="0">
+              <span class="kalk-sug">Akik után a kedvezmény ténylegesen jár.</span>
+            </div>
+            <div>
+              <label class="vwp-label" for="eltartott">Eltartott összesen</label>
+              <input class="vwp-input" id="eltartott" name="eltartott" type="number" min="0" max="20" step="1" value="0">
+              <span class="kalk-sug">A kedvezményezettekkel együtt — ez dönti el a kedvezmény sávját.</span>
+            </div>
+            <div>
+              <label class="vwp-label" for="beteg">Ebből tartósan beteg</label>
+              <input class="vwp-input" id="beteg" name="beteg" type="number" min="0" max="20" step="1" value="0">
+              <span class="kalk-sug">Tartósan beteg vagy súlyosan fogyatékos kedvezményezett eltartott.</span>
+            </div>
+          </div>
+
+          <div class="kalk-mezok" style="margin-top:18px;">
+            <div class="kalk-kapcsolo">
+              <input type="checkbox" id="megosztas" name="megosztas">
+              <label for="megosztas">Megosztva érvényesítem
+                <span class="kalk-sug">Ha a kedvezményt a házastárssal vagy élettárssal osztjátok meg, add meg a rád eső havi összeget.</span>
+              </label>
+            </div>
+            <div id="megosztasMezo" hidden>
+              <label class="vwp-label" for="csaladiOsszeg">Az általam érvényesített családi kedvezmény</label>
+              <input class="vwp-input" id="csaladiOsszeg" name="csaladiOsszeg" type="text" inputmode="numeric" value="0">
+              <span class="kalk-sug" id="csaladiSug"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="kalk-blokk">
+          <details>
+            <summary style="cursor:pointer;font-weight:600;color:var(--vwp-ink);">További adat az éves összesítőhöz</summary>
+            <div class="kalk-mezok" style="margin-top:18px;">
+              <div>
+                <label class="vwp-label" for="masJovedelem">Éves, mástól kapott jövedelem</label>
+                <input class="vwp-input" id="masJovedelem" name="masJovedelem" type="text" inputmode="numeric" value="0">
+                <span class="kalk-sug">Más kifizetőtől származó éves összevont jövedelem. Csak az éves adóalap sorát mozgatja.</span>
+              </div>
+            </div>
+          </details>
+        </div>
+      </form>
+
+      <!-- ---------------- Eredmény ---------------- -->
+      <div class="kalk-eredmeny" id="eredmeny" aria-live="polite">
+        <div class="kalk-fooszeg">
+          <span class="kalk-fooszeg__cimke" id="fooEredmenyCimke">Kifizetendő nettó bér</span>
+          <p class="kalk-fooszeg__ertek" id="fooEredmeny">–</p>
+        </div>
+
+        <div class="kalk-tetelek">
+          <h3>Havi elszámolás</h3>
+          <div class="kalk-sor"><span>Bruttó bér</span><span id="sorBrutto">–</span></div>
+          <div class="kalk-sor kalk-sor--halvany"><span>Adóelőleg alapja</span><span id="sorAdoalap">–</span></div>
+          <div class="kalk-sor"><span>Személyi jövedelemadó (15%)</span><span id="sorSzja">–</span></div>
+          <div class="kalk-sor"><span>Társadalombiztosítási járulék (18,5%)</span><span id="sorTb">–</span></div>
+          <div class="kalk-sor kalk-sor--halvany" id="sorCsjSor"><span>Családi járulékkedvezmény</span><span id="sorCsj">–</span></div>
+          <div class="kalk-sor kalk-sor--kiemelt"><span>Levonások összesen</span><span id="sorLevonas">–</span></div>
+        </div>
+
+        <div class="kalk-tetelek">
+          <h3>Munkáltatói oldal</h3>
+          <div class="kalk-sor"><span>Szociális hozzájárulási adó (13%)</span><span id="sorSzocho">–</span></div>
+          <div class="kalk-sor kalk-sor--kiemelt"><span>Teljes havi bérköltség</span><span id="sorBerkoltseg">–</span></div>
+        </div>
+
+        <div class="kalk-tetelek">
+          <h3>Éves szinten</h3>
+          <div class="kalk-sor"><span>Éves bruttó</span><span id="sorEvesBrutto">–</span></div>
+          <div class="kalk-sor"><span>Éves nettó</span><span id="sorEvesNetto">–</span></div>
+          <div class="kalk-sor kalk-sor--halvany"><span>Éves összevont adóalap</span><span id="sorEvesAdoalap">–</span></div>
+          <div class="kalk-sor kalk-sor--halvany"><span>Éves bérköltség</span><span id="sorEvesBerkoltseg">–</span></div>
+        </div>
+
+        <div class="kalk-megjegyzes" id="megjegyzes"></div>
+
+        <div class="kalk-muveletek">
+          <button type="button" class="vwp-btn vwp-btn--outline" id="masol">Eredmény másolása</button>
+          <button type="button" class="vwp-btn vwp-btn--outline" id="nyomtat">Nyomtatás</button>
+        </div>
+      </div>
+
+    </div>
+
+    <hr class="vwp-divider" style="margin-top:50px;">
+    <p class="kalk-jogi">
+      A kalkulátor tájékoztató jellegű, a 2026-ban hatályos szabályok szerint számol, munkaviszonyban
+      álló, biztosított magánszemélyre. Nem veszi figyelembe az egyedi jogviszonyokat, a szociális
+      hozzájárulási adó kedvezményeit és az év közbeni változásokat, ezért nem helyettesíti a
+      bérszámfejtést. Készítette: Tamás Viktória.
+    </p>
+  </div>
+</section>
+
+<footer class="vwp-footer kalk-csak-onalloan">
+  <div class="vwp-container">
+    <div style="display:flex;flex-wrap:wrap;gap:30px;justify-content:space-between;">
+      <nav style="display:flex;gap:20px;flex-wrap:wrap;">
+        <a href="https://viktoriawp.eu/">Főoldal</a>
+        <a href="https://viktoriawp.eu/blog/">Blog</a>
+        <a href="../">Kalkulátorok</a>
+        <a href="https://viktoriawp.eu/kapcsolat/">Kapcsolat</a>
+      </nav>
+    </div>
+    <div class="vwp-footer__bottom">
+      <span>Készítette: Tamás Viktória – Minden jog fenntartva!</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../assets/szja2026.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var beagyazva = new URLSearchParams(location.search).get('embed') === '1';
+  if (beagyazva) document.documentElement.classList.add('beagyazva');
+
+  var E = function (id) { return document.getElementById(id); };
+
+  var irany = 'brutto';
+
+  /* ---------- Formázás ---------- */
+
+  function ft(n) {
+    return szamKent(Math.round(n)) + ' Ft';
+  }
+
+  function szamKent(n) {
+    return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  }
+
+  function ertek(mezo) {
+    var tiszta = String(mezo.value).replace(/[^\d]/g, '');
+    return tiszta === '' ? 0 : parseInt(tiszta, 10);
+  }
+
+  /* Ezres tagolás gépelés közben, a kurzor helyének megőrzésével. */
+  function tagol(mezo) {
+    var elotteSzamjegy = String(mezo.value).slice(0, mezo.selectionStart || 0).replace(/[^\d]/g, '').length;
+    var szam = ertek(mezo);
+    mezo.value = szamKent(szam);
+    var uj = 0, latott = 0;
+    while (uj < mezo.value.length && latott < elotteSzamjegy) {
+      if (/\d/.test(mezo.value[uj])) latott++;
+      uj++;
+    }
+    if (mezo === document.activeElement) mezo.setSelectionRange(uj, uj);
+  }
+
+  var penzMezok = ['fooszeg', 'nemRendszeres', 'csaladiOsszeg', 'masJovedelem'];
+
+  /* ---------- Bemenet összeállítása ---------- */
+
+  function bemenet() {
+    var kedvezmenyezett = Math.max(0, parseInt(E('kedvezmenyezett').value, 10) || 0);
+    var eltartott = Math.max(0, parseInt(E('eltartott').value, 10) || 0);
+    var beteg = Math.max(0, parseInt(E('beteg').value, 10) || 0);
+
+    return {
+      brutto: 0,
+      masJovedelem: ertek(E('masJovedelem')),
+      anyakKedvezmenye: E('anyak').value,
+      fiatal25: E('fiatal25').checked,
+      szemelyi: E('szemelyi').checked,
+      elsoHazas: E('elsoHazas').checked,
+      kedvezmenyezettEltartott: kedvezmenyezett,
+      eltartott: Math.max(eltartott, kedvezmenyezett),
+      betegEltartott: Math.min(beteg, kedvezmenyezett),
+      csaladiIgenybevett: E('megosztas').checked ? ertek(E('csaladiOsszeg')) : null
+    };
+  }
+
+  /* ---------- Számítás és kiírás ---------- */
+
+  function frissit() {
+    var be = bemenet();
+    var eredmeny;
+
+    if (irany === 'netto') {
+      eredmeny = SZJA2026.bruttoNettobol(ertek(E('fooszeg')), be);
+    } else {
+      be.brutto = ertek(E('fooszeg')) + ertek(E('nemRendszeres'));
+      eredmeny = SZJA2026.szamol(be);
+    }
+
+    E('fooEredmeny').textContent = ft(irany === 'netto' ? eredmeny.brutto : eredmeny.netto);
+    E('fooEredmenyCimke').textContent = irany === 'netto' ? 'Szükséges bruttó bér' : 'Kifizetendő nettó bér';
+
+    E('sorBrutto').textContent = ft(eredmeny.brutto);
+    E('sorAdoalap').textContent = ft(eredmeny.adoelolegAlapja);
+    E('sorSzja').textContent = '− ' + ft(eredmeny.szja);
+    E('sorTb').textContent = '− ' + ft(eredmeny.tbJarulek);
+    E('sorCsj').textContent = '+ ' + ft(eredmeny.csaladiJarulekkedvezmeny);
+    E('sorCsjSor').hidden = eredmeny.csaladiJarulekkedvezmeny === 0;
+    E('sorLevonas').textContent = '− ' + ft(eredmeny.levonasok);
+
+    E('sorSzocho').textContent = ft(eredmeny.szocho);
+    E('sorBerkoltseg').textContent = ft(eredmeny.berkoltseg);
+
+    E('sorEvesBrutto').textContent = ft(eredmeny.eves.brutto);
+    E('sorEvesNetto').textContent = ft(eredmeny.eves.netto);
+    E('sorEvesAdoalap').textContent = ft(eredmeny.eves.adoalap);
+    E('sorEvesBerkoltseg').textContent = ft(eredmeny.eves.berkoltseg);
+
+    E('csaladiSug').textContent = 'Igénybe vehető havi keret: ' + ft(eredmeny.csaladi.igenybeveheto) + '.';
+
+    megjegyzes(be, eredmeny);
+    magassagotKuld();
+  }
+
+  function megjegyzes(be, eredmeny) {
+    var doboz = E('megjegyzes');
+    var darabok = [];
+
+    var nelkul = SZJA2026.kedvezmenyNelkul({ brutto: eredmeny.brutto });
+    var nyereseg = eredmeny.netto - nelkul.netto;
+    if (nyereseg > 0) {
+      darabok.push('A kedvezmények havonta <strong>' + ft(nyereseg) + '</strong>-tal növelik a nettó bért, ' +
+                   'éves szinten <strong>' + ft(nyereseg * 12) + '</strong>-tal.');
+    }
+
+    var elveszett = eredmeny.kedvezmenyek.reduce(function (osszeg, tetel) { return osszeg + tetel.elveszett; }, 0);
+    if (elveszett > 0) {
+      darabok.push('A jövedelem nem nyeli el a kedvezmények teljes összegét: havi ' + ft(elveszett) +
+                   ' adóalap-kedvezmény kihasználatlan marad.');
+    }
+
+    if (eredmeny.csaladi.maradek > 0 && eredmeny.csaladiJarulekkedvezmeny < Math.round(eredmeny.csaladi.maradek * 0.15)) {
+      darabok.push('A családi kedvezményből a járulék erejéig érvényesíthető rész is elfogyott — ' +
+                   'a fennmaradó összeg ebben a hónapban nem használható fel.');
+    }
+
+    doboz.innerHTML = darabok.join(' ');
+  }
+
+  /* ---------- Irányváltás ---------- */
+
+  function iranyt(uj) {
+    irany = uj;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-irany]'), function (gomb) {
+      var aktiv = gomb.dataset.irany === uj;
+      gomb.setAttribute('aria-pressed', aktiv ? 'true' : 'false');
+      gomb.classList.toggle('vwp-btn--outline', !aktiv);
+    });
+
+    E('fooszegCimke').textContent = uj === 'netto' ? 'Kívánt havi nettó bér' : 'Havi bruttó bér';
+    E('fooszegSug').textContent = uj === 'netto'
+      ? 'Forintban, havi kifizetendő összeg — ebből számoljuk vissza a bruttót.'
+      : 'Forintban, havi összeg.';
+    E('nemRendszeresMezo').hidden = uj === 'netto';
+
+    frissit();
+  }
+
+  /* ---------- Vágólap ---------- */
+
+  function osszefoglalo() {
+    var sorok = [];
+    document.querySelectorAll('.kalk-tetelek').forEach(function (blokk) {
+      if (blokk.hidden) return;
+      sorok.push('');
+      sorok.push(blokk.querySelector('h3').textContent.toUpperCase());
+      blokk.querySelectorAll('.kalk-sor').forEach(function (sor) {
+        if (sor.hidden) return;
+        var cimke = sor.children[0].textContent;
+        var ertek = sor.children[1].textContent;
+        sorok.push(cimke + ': ' + ertek);
+      });
+    });
+    return 'Bér- és jövedelemkalkulátor 2026\n' +
+      E('fooEredmenyCimke').textContent + ': ' + E('fooEredmeny').textContent + '\n' +
+      sorok.join('\n') + '\n\nA számítás tájékoztató jellegű.';
+  }
+
+  /* ---------- Beágyazott mód: magasság a szülő oldalnak ---------- */
+
+  function magassagotKuld() {
+    if (!beagyazva || !window.parent || window.parent === window) return;
+    window.parent.postMessage({
+      tipus: 'kalkulator-magassag',
+      magassag: document.documentElement.scrollHeight
+    }, '*');
+  }
+
+  /* ---------- Bekötés ---------- */
+
+  penzMezok.forEach(function (id) {
+    var mezo = E(id);
+    tagol(mezo);
+    mezo.addEventListener('input', function () { tagol(mezo); frissit(); });
+  });
+
+  ['anyak', 'fiatal25', 'szemelyi', 'elsoHazas', 'kedvezmenyezett', 'eltartott', 'beteg'].forEach(function (id) {
+    E(id).addEventListener('input', frissit);
+    E(id).addEventListener('change', frissit);
+  });
+
+  E('megosztas').addEventListener('change', function () {
+    E('megosztasMezo').hidden = !this.checked;
+    frissit();
+  });
+
+  document.querySelectorAll('[data-irany]').forEach(function (gomb) {
+    gomb.addEventListener('click', function () { iranyt(gomb.dataset.irany); });
+  });
+
+  E('nyomtat').addEventListener('click', function () { window.print(); });
+
+  E('masol').addEventListener('click', function () {
+    var gomb = this;
+    var eredetiSzoveg = gomb.textContent;
+    navigator.clipboard.writeText(osszefoglalo()).then(function () {
+      gomb.textContent = 'Vágólapra másolva';
+      setTimeout(function () { gomb.textContent = eredetiSzoveg; }, 2000);
+    }, function () {
+      gomb.textContent = 'Nem sikerült';
+      setTimeout(function () { gomb.textContent = eredetiSzoveg; }, 2000);
+    });
+  });
+
+  window.addEventListener('resize', magassagotKuld);
+
+  frissit();
+})();
+</script>
+
+</body>
+</html>

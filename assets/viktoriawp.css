@@ -1,0 +1,392 @@
+/* ============================================================
+   viktoriawp.eu — vizuális arculat
+   Önálló, függőségmentes CSS. Bemásolható <style> blokkba is.
+   A betűk betöltéséhez ez kell a <head>-be:
+
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Montserrat:wght@400;600;700&family=Piazzolla:wght@400;700&display=swap&subset=latin-ext" rel="stylesheet">
+   ============================================================ */
+
+:root {
+  /* Színek */
+  --vwp-primary:  #02023B;  /* éjkék – az egyetlen kiemelőszín */
+  --vwp-ink:      #011111;  /* címsor szöveg */
+  --vwp-text:     #62636A;  /* szövegtörzs */
+  --vwp-white:    #FFFFFF;
+  --vwp-lavender: #F0F0FF;  /* halvány szekcióháttér */
+  --vwp-border:   #DBDBDF;  /* szegély, elválasztó */
+
+  /* Betűcsaládok */
+  --vwp-font-display: "Playfair Display", Georgia, serif;  /* címsorok */
+  --vwp-font-body:    "Montserrat", "Helvetica Neue", Arial, sans-serif;
+  --vwp-font-accent:  "Piazzolla", Georgia, serif;         /* eyebrow, blogcím */
+
+  /* Formák */
+  --vwp-radius-btn:  6px;
+  --vwp-radius-card: 20px;
+
+  /* Elrendezés */
+  --vwp-container: 1260px;
+  --vwp-gutter: 20px;
+  --vwp-section-y: 80px;   /* függőleges szekciótérköz */
+
+  /* Az egyetlen árnyék az arculatban (ragadós fejléc) */
+  --vwp-shadow-header: 0 5px 10px rgba(0, 0, 0, .1);
+}
+
+/* ---------- Alapok ---------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--vwp-white);
+  color: var(--vwp-text);
+  font-family: var(--vwp-font-body);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;   /* 25.6px – az élő oldalon mért érték */
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--vwp-font-display);
+  font-weight: 400;          /* szándékosan nem bold – a Playfair enélkül is hangsúlyos */
+  color: var(--vwp-ink);
+  margin: 0 0 .5em;
+}
+
+h1 { font-size: 60px; line-height: 78px;   letter-spacing: -.2px; }
+h2 { font-size: 40px; line-height: 52px; }
+h3 { font-size: 28px; line-height: 36.4px; }
+h4 { font-size: 22px; line-height: 30px; }
+
+p { margin: 0 0 1.2em; }
+
+a {
+  color: var(--vwp-primary);
+  text-decoration: none;
+  transition: opacity .2s ease;
+}
+a:hover { opacity: .75; }
+
+::selection      { background: var(--vwp-primary); color: #fff; }
+::-moz-selection { background: var(--vwp-primary); color: #fff; }
+
+mark {
+  background: var(--vwp-primary);
+  color: #fff;
+  font-weight: 700;
+  padding: 0 .2em;
+}
+
+img { max-width: 100%; height: auto; display: block; }
+
+/* ---------- Elrendezés ---------- */
+
+.vwp-container {
+  width: 100%;
+  max-width: var(--vwp-container);
+  margin-inline: auto;
+  padding-inline: var(--vwp-gutter);
+}
+
+.vwp-section        { padding-block: var(--vwp-section-y); }
+.vwp-section--light { background: var(--vwp-lavender); }
+.vwp-section--dark  { background: var(--vwp-primary); color: #fff; }
+
+/* Sötét szekcióban minden szöveg fehér */
+.vwp-section--dark h1,
+.vwp-section--dark h2,
+.vwp-section--dark h3,
+.vwp-section--dark h4,
+.vwp-section--dark p,
+.vwp-section--dark a { color: #fff; }
+
+.vwp-grid {
+  display: grid;
+  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+/* Rövid, középre zárt elválasztó vonal – az oldalon 150px széles */
+.vwp-divider {
+  width: 150px;
+  height: 1px;
+  border: 0;
+  margin: 30px 0;
+  background: var(--vwp-border);
+}
+
+/* ---------- Eyebrow (kis felirat a címsor fölött) ---------- */
+
+.vwp-eyebrow {
+  display: block;
+  font-family: var(--vwp-font-accent);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--vwp-primary);
+  margin-bottom: .4em;
+}
+
+.vwp-section--dark .vwp-eyebrow { color: #fff; }
+
+/* Ritkított, nagybetűs változat (Elementor „accent" tipográfia) */
+.vwp-eyebrow--caps {
+  font-family: var(--vwp-font-display);
+  font-size: 1.2em;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ---------- Gomb ---------- */
+
+.vwp-btn {
+  display: inline-block;
+  padding: 15px 30px;
+  border: 2px solid var(--vwp-primary);
+  border-radius: var(--vwp-radius-btn);
+  background: var(--vwp-primary);
+  color: #fff;
+  font-family: var(--vwp-font-body);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease, opacity .2s ease;
+}
+
+.vwp-btn:hover { opacity: .88; }
+
+/* Másodlagos: átlátszó háttér, éjkék keret */
+.vwp-btn--outline {
+  background: transparent;
+  color: var(--vwp-primary);
+}
+.vwp-btn--outline:hover {
+  background: var(--vwp-primary);
+  color: #fff;
+  opacity: 1;
+}
+
+/* Sötét háttéren fordul a logika */
+.vwp-section--dark .vwp-btn,
+.vwp-footer .vwp-btn {
+  background: #fff;
+  border-color: #fff;
+  color: var(--vwp-primary);
+}
+.vwp-section--dark .vwp-btn--outline,
+.vwp-footer .vwp-btn--outline {
+  background: transparent;
+  color: #fff;
+}
+
+/* Szöveges link-gomb (nyíllal), pl. „Tovább olvasom →" */
+.vwp-link {
+  font-family: var(--vwp-font-body);
+  font-weight: 700;
+  color: var(--vwp-primary);
+  text-decoration: none;
+}
+
+/* ---------- Kártya ---------- */
+
+.vwp-card {
+  border-radius: var(--vwp-radius-card);
+  overflow: hidden;         /* hogy a kép is felvegye a lekerekítést */
+  background: var(--vwp-white);
+  /* Szándékosan nincs árnyék és keret – az arculat így tagol. */
+}
+
+/* Háttérképes szolgáltatáskártya: sötét fátyol a szöveg olvashatóságáért */
+.vwp-card--image {
+  position: relative;
+  padding: 40px 45px;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+}
+.vwp-card--image::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(2, 2, 59, 0) 30%, rgba(2, 2, 59, .78) 100%);
+}
+.vwp-card--image > * { position: relative; }
+.vwp-card--image h2,
+.vwp-card--image h3,
+.vwp-card--image p { color: #fff; }
+
+/* ---------- Számozott sáv ---------- */
+
+.vwp-numbered {
+  background: var(--vwp-primary);
+  color: #fff;
+  padding: 40px;
+  border-radius: 0 var(--vwp-radius-card) var(--vwp-radius-card) 0;
+}
+/* Váltakozó irány: minden második sáv a másik oldalán kerekedik */
+.vwp-numbered--right {
+  border-radius: var(--vwp-radius-card) 0 0 var(--vwp-radius-card);
+}
+
+.vwp-numbered h3,
+.vwp-numbered p { color: #fff; }
+
+.vwp-numbered__num {
+  display: block;
+  font-family: var(--vwp-font-body);
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  margin-bottom: .3em;
+}
+
+/* ---------- Fejléc ---------- */
+
+.vwp-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--vwp-white);
+  box-shadow: var(--vwp-shadow-header);
+}
+
+.vwp-header__inner {
+  max-width: var(--vwp-container);
+  margin-inline: auto;
+  padding: 12px var(--vwp-gutter);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.vwp-logo {
+  font-family: var(--vwp-font-display);
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--vwp-ink);
+  text-decoration: none;
+}
+
+.vwp-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.vwp-nav a {
+  padding: 10px;
+  font-family: var(--vwp-font-body);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--vwp-ink);
+  text-decoration: none;
+}
+.vwp-nav a:hover,
+.vwp-nav a[aria-current="page"] { color: var(--vwp-primary); opacity: 1; }
+
+/* Felső kontaktsáv a fejléc fölött */
+.vwp-topbar {
+  background: var(--vwp-primary);
+  color: #fff;
+  font-size: 14px;
+}
+.vwp-topbar a { color: #fff; }
+
+/* ---------- Blogkártya ---------- */
+
+.vwp-post-card__thumb {
+  border-radius: var(--vwp-radius-card);
+  overflow: hidden;
+  aspect-ratio: 3 / 2;
+  margin-bottom: 16px;
+}
+.vwp-post-card__thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.vwp-post-card__title {
+  font-family: var(--vwp-font-accent);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--vwp-ink);
+  margin: 0 0 .4em;
+}
+
+.vwp-post-card__excerpt { color: var(--vwp-text); margin-bottom: .6em; }
+
+/* ---------- Lábléc ---------- */
+
+.vwp-footer {
+  background: var(--vwp-primary);
+  color: #fff;
+  padding-block: 60px 30px;
+}
+.vwp-footer a { color: #fff; }
+.vwp-footer h3, .vwp-footer h4 { color: #fff; }
+
+.vwp-footer__bottom {
+  border-top: 1px solid rgba(255, 255, 255, .2);
+  margin-top: 40px;
+  padding-top: 20px;
+  font-size: 14px;
+}
+
+/* ---------- Űrlap ---------- */
+
+.vwp-input,
+.vwp-textarea,
+.vwp-select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--vwp-border);
+  border-radius: var(--vwp-radius-btn);
+  background: #fff;
+  font-family: var(--vwp-font-body);
+  font-size: 16px;
+  color: var(--vwp-ink);
+}
+.vwp-input:focus,
+.vwp-textarea:focus,
+.vwp-select:focus {
+  outline: none;
+  border-color: var(--vwp-primary);
+}
+
+.vwp-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--vwp-ink);
+}
+
+/* ---------- Mobil ---------- */
+
+@media (max-width: 767px) {
+  :root { --vwp-section-y: 48px; }
+
+  h1 { font-size: 30px; line-height: 39px; }
+  h2 { font-size: 24px; line-height: 31.2px; }
+  h3 { font-size: 20px; line-height: 26px; }
+  h4 { font-size: 18px; line-height: 26px; }
+
+  .vwp-card--image { padding: 30px 25px; min-height: 260px; }
+  .vwp-numbered,
+  .vwp-numbered--right { border-radius: var(--vwp-radius-card); padding: 30px 25px; }
+  .vwp-logo { font-size: 22px; }
+}

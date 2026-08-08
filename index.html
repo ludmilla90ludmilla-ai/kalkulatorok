@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalkulátorok – Tamás Viktória</title>
+<meta name="description" content="Könyvelői kalkulátorok vállalkozóknak és munkavállalóknak: bér, adó, jövedelem — magyar szabályok szerint, böngészőben.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Montserrat:wght@400;600;700&family=Piazzolla:wght@400;700&display=swap&subset=latin-ext" rel="stylesheet">
+<link rel="stylesheet" href="assets/viktoriawp.css">
+<style>
+  .kalk-lista { display: grid; gap: 20px; margin-top: 30px; }
+
+  .kalk-elem {
+    background: var(--vwp-lavender);
+    border-radius: var(--vwp-radius-card);
+    padding: 34px 36px;
+  }
+  .kalk-elem h2 { font-size: 28px; line-height: 36.4px; margin-bottom: .3em; }
+  .kalk-elem p { max-width: 62ch; }
+
+  .kalk-elem--keszul { background: #fff; border: 1px dashed var(--vwp-border); }
+  .kalk-elem--keszul h2, .kalk-elem--keszul p { color: var(--vwp-text); }
+
+  @media (max-width: 767px) { .kalk-elem { padding: 26px 24px; } }
+</style>
+</head>
+<body>
+
+<header class="vwp-header">
+  <div class="vwp-header__inner">
+    <a class="vwp-logo" href="https://viktoriawp.eu/">Tamás Viktória</a>
+    <nav class="vwp-nav">
+      <a href="https://viktoriawp.eu/">Főoldal</a>
+      <a href="https://viktoriawp.eu/blog/">Blog</a>
+      <a href="./" aria-current="page">Kalkulátorok</a>
+      <a href="https://viktoriawp.eu/kapcsolat/">Kapcsolat</a>
+    </nav>
+  </div>
+</header>
+
+<section class="vwp-section">
+  <div class="vwp-container">
+    <span class="vwp-eyebrow">Számvitel és Adózás</span>
+    <h1>Kalkulátorok</h1>
+    <p style="max-width:60ch;">
+      Böngészőben futó számolóeszközök a könyvelői mindennapok visszatérő kérdéseire.
+      Regisztráció nélkül használhatók, és semmilyen beírt adat nem hagyja el a gépedet.
+    </p>
+
+    <div class="kalk-lista">
+      <article class="kalk-elem">
+        <h2>Bér- és jövedelemkalkulátor 2026</h2>
+        <p>
+          Bruttó bérből nettó, megcélzott nettóból bruttó, és a munkáltatót terhelő teljes bérköltség —
+          az anyák kedvezményével, a 25 év alattiak, a személyi, az első házasok és a családi
+          kedvezménnyel, valamint a családi járulékkedvezménnyel együtt.
+        </p>
+        <p style="margin-bottom:0;"><a class="vwp-btn" href="ber-kalkulator/">Megnyitom</a></p>
+      </article>
+
+      <article class="kalk-elem kalk-elem--keszul">
+        <h2>Készül</h2>
+        <p style="margin-bottom:0;">
+          A további kalkulátorok ide kerülnek. Ha van olyan visszatérő számítás, ami segítene a
+          munkádban, <a href="https://viktoriawp.eu/kapcsolat/">írd meg</a>.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<footer class="vwp-footer">
+  <div class="vwp-container">
+    <div style="display:flex;flex-wrap:wrap;gap:30px;justify-content:space-between;">
+      <nav style="display:flex;gap:20px;flex-wrap:wrap;">
+        <a href="https://viktoriawp.eu/">Főoldal</a>
+        <a href="https://viktoriawp.eu/blog/">Blog</a>
+        <a href="./">Kalkulátorok</a>
+        <a href="https://viktoriawp.eu/kapcsolat/">Kapcsolat</a>
+      </nav>
+    </div>
+    <div class="vwp-footer__bottom">
+      <span>Készítette: Tamás Viktória – Minden jog fenntartva!</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Számítómotor ellenőrzése – Kalkulátorok</title>
+<style>
+  body { font: 15px/1.6 "Segoe UI", system-ui, sans-serif; color: #011111; margin: 40px auto; max-width: 900px; padding: 0 20px; }
+  h1 { font-size: 26px; margin-bottom: 4px; }
+  p.alcim { color: #62636A; margin-top: 0; }
+  #osszegzes { padding: 14px 18px; border-radius: 6px; font-weight: 700; margin: 24px 0; }
+  .rendben { background: #E7F6EC; color: #10633A; }
+  .hibas   { background: #FBEAEA; color: #8C1C1C; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid #DBDBDF; vertical-align: top; }
+  th { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: #62636A; }
+  td.allapot { width: 34px; font-weight: 700; }
+  tr.ok td.allapot { color: #10633A; }
+  tr.bukott td.allapot { color: #8C1C1C; }
+  tr.bukott { background: #FDF4F4; }
+  td.szam { font-variant-numeric: tabular-nums; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<h1>Számítómotor ellenőrzése</h1>
+<p class="alcim">A <code>assets/szja2026.js</code> kézzel kiszámolt eseteken. Az oldal megnyitása futtatja az ellenőrzést.</p>
+
+<div id="osszegzes">Futtatás…</div>
+
+<table>
+  <thead>
+    <tr><th class="allapot"></th><th>Eset</th><th>Vizsgált érték</th><th>Várt</th><th>Kapott</th></tr>
+  </thead>
+  <tbody id="sorok"></tbody>
+</table>
+
+<script src="assets/szja2026.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var esetek = [];
+
+  function eset(nev, be, vartak) {
+    var eredmeny = SZJA2026.szamol(be);
+    Object.keys(vartak).forEach(function (mezo) {
+      esetek.push({ nev: nev, mezo: mezo, vart: vartak[mezo], kapott: eredmeny[mezo] });
+    });
+  }
+
+  function allit(nev, mezo, vart, kapott) {
+    esetek.push({ nev: nev, mezo: mezo, vart: vart, kapott: kapott });
+  }
+
+  var ures = {
+    anyakKedvezmenye: 'nincs', fiatal25: false, szemelyi: false, elsoHazas: false,
+    kedvezmenyezettEltartott: 0, eltartott: 0, betegEltartott: 0, csaladiIgenybevett: null
+  };
+
+  function be(valtozok) {
+    var uj = {};
+    Object.keys(ures).forEach(function (k) { uj[k] = ures[k]; });
+    Object.keys(valtozok).forEach(function (k) { uj[k] = valtozok[k]; });
+    return uj;
+  }
+
+  /* ---- Kedvezmény nélküli alapesetek ---------------------------------- */
+
+  eset('500 000 Ft kedvezmény nélkül', be({ brutto: 500000 }), {
+    szja: 75000, tbJarulek: 92500, netto: 332500, szocho: 65000, berkoltseg: 565000
+  });
+
+  eset('Minimálbér (322 800 Ft) kedvezmény nélkül', be({ brutto: 322800 }), {
+    szja: 48420, tbJarulek: 59718, netto: 214662, berkoltseg: 364764
+  });
+
+  eset('Nulla jövedelem', be({ brutto: 0 }), {
+    szja: 0, tbJarulek: 0, netto: 0, berkoltseg: 0
+  });
+
+  /* ---- 25 év alatti fiatalok kedvezménye ------------------------------ */
+
+  eset('25 év alatti, 500 000 Ft (keret alatt)', be({ brutto: 500000, fiatal25: true }), {
+    adoelolegAlapja: 0, szja: 0, tbJarulek: 92500, netto: 407500
+  });
+
+  eset('25 év alatti, 800 000 Ft (keret fölött)', be({ brutto: 800000, fiatal25: true }), {
+    adoelolegAlapja: 84235, szja: 12635, tbJarulek: 148000, netto: 639365
+  });
+
+  /* ---- Családi kedvezmény --------------------------------------------- */
+
+  eset('1 kedvezményezett eltartott, 400 000 Ft', be({
+    brutto: 400000, kedvezmenyezettEltartott: 1, eltartott: 1
+  }), { adoelolegAlapja: 266660, szja: 39999, netto: 286001 });
+
+  eset('2 kedvezményezett eltartott, 400 000 Ft (átfordul járulékkedvezménybe)', be({
+    brutto: 400000, kedvezmenyezettEltartott: 2, eltartott: 2
+  }), { szja: 0, tbJarulek: 74000, csaladiJarulekkedvezmeny: 19998, netto: 345998 });
+
+  eset('3 kedvezményezett eltartott, 300 000 Ft (teljes járulékmentesség)', be({
+    brutto: 300000, kedvezmenyezettEltartott: 3, eltartott: 3
+  }), { szja: 0, csaladiJarulekkedvezmeny: 55500, levontJarulek: 0, netto: 300000 });
+
+  eset('2 eltartott, ebből 1 tartósan beteg, 600 000 Ft', be({
+    brutto: 600000, kedvezmenyezettEltartott: 2, eltartott: 2, betegEltartott: 1
+  }), { szja: 0, csaladiJarulekkedvezmeny: 9999, netto: 498999 });
+
+  eset('Megosztott családi kedvezmény: 2 gyermekből a fele, 600 000 Ft', be({
+    brutto: 600000, kedvezmenyezettEltartott: 2, eltartott: 2, csaladiIgenybevett: 266660
+  }), { adoelolegAlapja: 333340, szja: 50001, csaladiJarulekkedvezmeny: 0 });
+
+  /* ---- Anyák kedvezményei és a többi adóalap-kedvezmény ---------------- */
+
+  eset('NÉTAK, 600 000 Ft', be({ brutto: 600000, anyakKedvezmenye: 'netak' }), {
+    adoelolegAlapja: 0, szja: 0, tbJarulek: 111000, netto: 489000
+  });
+
+  eset('Két gyermeket nevelő anya, 900 000 Ft (nincs összeghatár)', be({
+    brutto: 900000, anyakKedvezmenye: 'ketto'
+  }), { adoelolegAlapja: 0, szja: 0 });
+
+  eset('30 év alatti anya + 2 gyermek, 900 000 Ft', be({
+    brutto: 900000, anyakKedvezmenye: 'anya30', kedvezmenyezettEltartott: 2, eltartott: 2
+  }), { szja: 0, tbJarulek: 166500, csaladiJarulekkedvezmeny: 52363, netto: 785863 });
+
+  eset('Személyi + első házasok kedvezménye, 400 000 Ft', be({
+    brutto: 400000, szemelyi: true, elsoHazas: true
+  }), { adoelolegAlapja: 259065, szja: 38860, netto: 287140 });
+
+  /* ---- Konstansok ------------------------------------------------------ */
+
+  allit('Személyi kedvezmény a minimálbér harmada', 'SZEMELYI_KEDVEZMENY', 107600, SZJA2026.SZEMELYI_KEDVEZMENY);
+  allit('Családi kedvezmény 3 eltartottnál', 'CSALADI_SAVOK[3]', 440000, SZJA2026.CSALADI_SAVOK[3]);
+
+  /* ---- Nettó → bruttó -------------------------------------------------- */
+
+  var vissza = SZJA2026.bruttoNettobol(332500, be({}));
+  allit('332 500 Ft nettóhoz tartozó bruttó', 'brutto', 500000, vissza.brutto);
+
+  allit('Nulla nettóhoz tartozó bruttó', 'brutto', 0, SZJA2026.bruttoNettobol(0, be({})).brutto);
+
+  // A legkisebb bruttót kell megtalálnia: eggyel kevesebb már nem elég.
+  allit('A talált bruttó a legkisebb megfelelő', 'netto(brutto-1) < cél',
+    true, SZJA2026.szamol(be({ brutto: 499999 })).netto < 332500);
+
+  /* ---- Oda-vissza egyezés véletlen bemenetekre ------------------------- */
+
+  var elteresek = 0, legnagyobbElteres = 0;
+  for (var i = 0; i < 400; i++) {
+    var minta = be({
+      brutto: 0,
+      kedvezmenyezettEltartott: i % 4,
+      eltartott: i % 4,
+      betegEltartott: i % 7 === 0 ? 1 : 0,
+      fiatal25: i % 5 === 0,
+      szemelyi: i % 3 === 0,
+      elsoHazas: i % 6 === 0,
+      anyakKedvezmenye: i % 11 === 0 ? 'anya30' : 'nincs'
+    });
+    var celNetto = Math.round(50000 + Math.random() * 2000000);
+    var talalt = SZJA2026.bruttoNettobol(celNetto, minta);
+    var elteres = Math.abs(talalt.netto - celNetto);
+    if (elteres > legnagyobbElteres) legnagyobbElteres = elteres;
+    if (elteres > 1) elteresek++;
+  }
+  allit('400 véletlen eset oda-vissza (nettó → bruttó → nettó)', 'eltérés > 1 Ft', 0, elteresek);
+  allit('400 véletlen eset oda-vissza', 'legnagyobb eltérés (Ft)', '≤ 1', legnagyobbElteres <= 1 ? '≤ 1' : legnagyobbElteres);
+
+  /* ---- Kiírás ---------------------------------------------------------- */
+
+  var sorok = document.getElementById('sorok');
+  var bukott = 0;
+
+  esetek.forEach(function (e) {
+    var jo = e.vart === e.kapott;
+    if (!jo) bukott++;
+    var tr = document.createElement('tr');
+    tr.className = jo ? 'ok' : 'bukott';
+    tr.innerHTML =
+      '<td class="allapot">' + (jo ? '✓' : '✕') + '</td>' +
+      '<td>' + e.nev + '</td>' +
+      '<td><code>' + e.mezo + '</code></td>' +
+      '<td class="szam">' + e.vart + '</td>' +
+      '<td class="szam">' + e.kapott + '</td>';
+    sorok.appendChild(tr);
+  });
+
+  var osszegzes = document.getElementById('osszegzes');
+  osszegzes.className = bukott === 0 ? 'rendben' : 'hibas';
+  osszegzes.textContent = bukott === 0
+    ? esetek.length + ' ellenőrzés, mind rendben.'
+    : esetek.length + ' ellenőrzésből ' + bukott + ' megbukott.';
+  document.title = (bukott === 0 ? '✓ ' : '✕ ') + document.title;
+})();
+</script>
+
+</body>
+</html>
