@@ -516,6 +516,7 @@
   /* ---------- Beágyazott mód: magasság a szülő oldalnak ---------- */
 
   var utolsoMagassag = 0;
+  var magassagFigyelo = null;
 
   /* A `documentElement.scrollHeight` sosem kisebb az iframe belmagasságánál, ezért ha egyszer
      túl nagy értéket küldünk, az beragad: a szülő megnöveli a keretet, mi meg már a megnövelt
@@ -567,13 +568,17 @@
 
   window.addEventListener('resize', magassagotKuld);
 
-  /* A tartalom magassága a keret szélességétől és a betöltött betűktől is függ, ezért nem
-     elég az ablak átméretezésére figyelni. */
-  if (beagyazva && window.ResizeObserver) {
-    new ResizeObserver(magassagotKuld).observe(document.body);
-  }
-  if (beagyazva && document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(magassagotKuld);
+  /* A tartalom magassága a keret szélességétől és a betöltött betűktől is függ, nem csak az
+     ablak méretétől. A ResizeObserver ezt elvileg elkapja, de a gyakorlatban nem mindig
+     jelez, ha az iframe-et kívülről méretezik át — ezért mellé megy egy másodpercenkénti
+     ellenőrzés is. Üzenet csak akkor megy, ha a magasság tényleg változott. */
+  if (beagyazva) {
+    if (window.ResizeObserver) {
+      magassagFigyelo = new ResizeObserver(magassagotKuld);
+      magassagFigyelo.observe(document.body);
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(magassagotKuld);
+    setInterval(magassagotKuld, 1000);
   }
 
   frissit();
