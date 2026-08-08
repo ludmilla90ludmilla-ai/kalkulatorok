@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Bérkalkulátor">
+  <title>Bérkalkulátor</title>
+
+  <!-- A kijelzőből a „Ft" kivágva, hogy alatta a háttér látsszon: így az ikon bármilyen
+       háttéren használható, nem csak a levendulán. A betűk mértani formák, nem szöveg —
+       az SVG képként rajzolva nem tudna webfontot betölteni. -->
+  <defs>
+    <mask id="ft-kivagas">
+      <rect x="168" y="104" width="176" height="88" rx="14" fill="#fff"/>
+      <!-- F -->
+      <rect x="216" y="120" width="14" height="56" fill="#000"/>
+      <rect x="216" y="120" width="46" height="14" fill="#000"/>
+      <rect x="216" y="142" width="36" height="12" fill="#000"/>
+      <!-- t -->
+      <rect x="272" y="128" width="14" height="48" fill="#000"/>
+      <rect x="262" y="142" width="34" height="12" fill="#000"/>
+    </mask>
+  </defs>
+
+  <!-- A kalkulátor teste -->
+  <rect x="128" y="64" width="256" height="384" rx="36"
+        fill="none" stroke="#02023B" stroke-width="18"/>
+
+  <!-- A kijelző: az egyetlen tömör felület -->
+  <rect x="168" y="104" width="176" height="88" rx="14" fill="#02023B" mask="url(#ft-kivagas)"/>
+
+  <!-- Billentyűk -->
+  <g fill="none" stroke="#02023B" stroke-width="10">
+    <rect x="168" y="232" width="44" height="44" rx="10"/>
+    <rect x="234" y="232" width="44" height="44" rx="10"/>
+    <rect x="300" y="232" width="44" height="44" rx="10"/>
+
+    <rect x="168" y="298" width="44" height="44" rx="10"/>
+    <rect x="234" y="298" width="44" height="44" rx="10"/>
+    <rect x="300" y="298" width="44" height="44" rx="10"/>
+
+    <rect x="168" y="364" width="44" height="44" rx="10"/>
+    <rect x="234" y="364" width="44" height="44" rx="10"/>
+    <rect x="300" y="364" width="44" height="44" rx="10"/>
+  </g>
+</svg>

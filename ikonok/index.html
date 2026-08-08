@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ikontár – Tamás Viktória</title>
+<meta name="description" content="A kalkulátorok kiemelt képei: ikon és név világoskék háttéren, letölthető 1920×667-es PNG-ként.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Montserrat:wght@400;600;700&family=Piazzolla:wght@400;700&display=swap&subset=latin-ext" rel="stylesheet">
+<link rel="stylesheet" href="../assets/viktoriawp.css">
+<style>
+  .ikon-lista { display: grid; gap: 60px; margin-top: 40px; }
+
+  .ikon-tetel h2 { font-size: 28px; line-height: 36.4px; margin-bottom: 16px; }
+
+  .ikon-banner {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--vwp-radius-card);
+    overflow: hidden;
+  }
+
+  /* Így néz ki az archívumkártyán: 375×130. Ekkorában kell olvashatónak maradnia. */
+  .ikon-kicsi {
+    display: block;
+    width: 375px;
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+  }
+
+  .ikon-also {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-top: 24px;
+  }
+
+  .ikon-muveletek { display: flex; flex-wrap: wrap; gap: 10px; }
+  .ikon-muveletek .vwp-btn { padding: 12px 20px; }
+
+  .ikon-cimke {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--vwp-primary);
+  }
+
+  .ikon-hiba {
+    padding: 16px 20px;
+    border-radius: var(--vwp-radius-btn);
+    background: var(--vwp-lavender);
+    font-size: 15px;
+  }
+  .ikon-hiba:empty { display: none; }
+</style>
+</head>
+<body>
+
+<header class="vwp-header">
+  <div class="vwp-header__inner">
+    <a class="vwp-logo" href="https://viktoriawp.eu/">Tamás Viktória</a>
+    <nav class="vwp-nav">
+      <a href="https://viktoriawp.eu/">Főoldal</a>
+      <a href="../">Kalkulátorok</a>
+      <a href="./" aria-current="page">Ikontár</a>
+      <a href="https://viktoriawp.eu/kapcsolat/">Kapcsolat</a>
+    </nav>
+  </div>
+</header>
+
+<section class="vwp-section">
+  <div class="vwp-container">
+    <span class="vwp-eyebrow">Kalkulátorok</span>
+    <h1>Ikontár</h1>
+    <p style="max-width:62ch;">
+      Minden kalkulátorhoz egy saját ikon, azonos felépítésű, világoskék hátterű képen.
+      A letöltött PNG mérete 1920×667 — ez a bejegyzések kiemelt képének szabványa a honlapon.
+      Az alsó, kisebb előnézet azt mutatja, hogyan látszik majd a kategórialistában.
+    </p>
+
+    <div class="ikon-hiba" id="hiba"></div>
+    <div class="ikon-lista" id="lista"></div>
+  </div>
+</section>
+
+<footer class="vwp-footer">
+  <div class="vwp-container">
+    <div style="display:flex;flex-wrap:wrap;gap:30px;justify-content:space-between;">
+      <nav style="display:flex;gap:20px;flex-wrap:wrap;">
+        <a href="https://viktoriawp.eu/">Főoldal</a>
+        <a href="../">Kalkulátorok</a>
+        <a href="./">Ikontár</a>
+      </nav>
+    </div>
+    <div class="vwp-footer__bottom">
+      <span>Készítette: Tamás Viktória – Minden jog fenntartva!</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  /* Új ikon felvétele: tedd az SVG-t az ../assets/ikonok/ mappába, és írj ide egy sort. */
+  var IKONOK = [
+    { fajl: 'ber-kalkulator.svg', nev: 'Bérkalkulátor', kimenet: 'ber-kalkulator-1920x667.png' }
+  ];
+
+  var SZELESSEG = 1920;
+  var MAGASSAG = 667;
+  var HATTER = '#F0F0FF';
+  var TINTA = '#02023B';
+  var IKON_MERET = 320;
+  var KOZ = 56;                       /* térköz az ikon és a név között */
+  var BETU = '400 104px "Playfair Display", Georgia, serif';
+
+  var E = function (id) { return document.getElementById(id); };
+
+  function hiba(szoveg) { E('hiba').textContent = szoveg; }
+
+  /* A bannert egyetlen helyen rajzoljuk meg — az előnézet és a letöltés ugyanazt kapja. */
+  function bannertRajzol(vaszon, ikonKep, nev) {
+    vaszon.width = SZELESSEG;
+    vaszon.height = MAGASSAG;
+    var c = vaszon.getContext('2d');
+
+    c.fillStyle = HATTER;
+    c.fillRect(0, 0, SZELESSEG, MAGASSAG);
+
+    c.fillStyle = TINTA;
+    c.font = BETU;
+    c.textBaseline = 'middle';
+    c.textAlign = 'left';
+
+    var szovegSzelesseg = c.measureText(nev).width;
+    var egyutt = IKON_MERET + KOZ + szovegSzelesseg;
+    var kezdet = Math.round((SZELESSEG - egyutt) / 2);
+
+    c.drawImage(ikonKep, kezdet, Math.round((MAGASSAG - IKON_MERET) / 2), IKON_MERET, IKON_MERET);
+    c.fillText(nev, kezdet + IKON_MERET + KOZ, MAGASSAG / 2);
+  }
+
+  function ikontBetolt(fajl) {
+    return fetch('../assets/ikonok/' + fajl)
+      .then(function (valasz) {
+        if (!valasz.ok) throw new Error(fajl + ': ' + valasz.status);
+        return valasz.text();
+      })
+      .then(function (svg) {
+        return new Promise(function (kesz, gond) {
+          var kep = new Image();
+          kep.onload = function () { kesz(kep); };
+          kep.onerror = function () { gond(new Error(fajl + ' nem rajzolható')); };
+          /* Data URI-ként rajzoljuk, hogy a vászon ne szennyeződjön be. */
+          kep.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+        });
+      });
+  }
+
+  function letolt(vaszon, fajlnev) {
+    vaszon.toBlob(function (adat) {
+      var cim = URL.createObjectURL(adat);
+      var link = document.createElement('a');
+      link.href = cim;
+      link.download = fajlnev;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(function () { URL.revokeObjectURL(cim); }, 1000);
+    }, 'image/png');
+  }
+
+  function tetelt(ikon, ikonKep) {
+    var doboz = document.createElement('article');
+    doboz.className = 'ikon-tetel';
+
+    var cim = document.createElement('h2');
+    cim.textContent = ikon.nev;
+    doboz.appendChild(cim);
+
+    var banner = document.createElement('canvas');
+    banner.className = 'ikon-banner';
+    bannertRajzol(banner, ikonKep, ikon.nev);
+    doboz.appendChild(banner);
+
+    var also = document.createElement('div');
+    also.className = 'ikon-also';
+
+    var kicsiBurok = document.createElement('div');
+    var cimke = document.createElement('span');
+    cimke.className = 'ikon-cimke';
+    cimke.textContent = 'Így néz ki a kategórialistában';
+    kicsiBurok.appendChild(cimke);
+    var kicsi = document.createElement('canvas');
+    kicsi.className = 'ikon-kicsi';
+    bannertRajzol(kicsi, ikonKep, ikon.nev);
+    kicsiBurok.appendChild(kicsi);
+    also.appendChild(kicsiBurok);
+
+    var muveletek = document.createElement('div');
+    muveletek.className = 'ikon-muveletek';
+
+    var pngGomb = document.createElement('button');
+    pngGomb.type = 'button';
+    pngGomb.className = 'vwp-btn';
+    pngGomb.textContent = 'PNG letöltése (1920×667)';
+    pngGomb.addEventListener('click', function () { letolt(banner, ikon.kimenet); });
+    muveletek.appendChild(pngGomb);
+
+    var svgLink = document.createElement('a');
+    svgLink.className = 'vwp-btn vwp-btn--outline';
+    svgLink.href = '../assets/ikonok/' + ikon.fajl;
+    svgLink.download = ikon.fajl;
+    svgLink.textContent = 'SVG letöltése';
+    muveletek.appendChild(svgLink);
+
+    also.appendChild(muveletek);
+    doboz.appendChild(also);
+    return doboz;
+  }
+
+  /* A név Playfair Displayjel készül, ezért meg kell várni a betű betöltését — enélkül a
+     vászon tartalék betűvel rajzolna, és a szöveg szélessége is elcsúszna. */
+  var betuKesz = document.fonts && document.fonts.load
+    ? document.fonts.load(BETU).then(function () { return document.fonts.ready; })
+    : Promise.resolve();
+
+  betuKesz
+    .then(function () { return Promise.all(IKONOK.map(function (i) { return ikontBetolt(i.fajl); })); })
+    .then(function (kepek) {
+      var lista = E('lista');
+      IKONOK.forEach(function (ikon, i) { lista.appendChild(tetelt(ikon, kepek[i])); });
+    })
+    .catch(function (baj) {
+      hiba('Az ikonok betöltése nem sikerült (' + baj.message + '). Ez az oldal webcímről ' +
+           'működik — helyben, fájlból megnyitva a böngésző nem engedi beolvasni az SVG-ket.');
+    });
+})();
+</script>
+
+</body>
+</html>

@@ -15,6 +15,8 @@ adatok nem hagyják el a gépet.
 | [`assets/szja2026.js`](assets/szja2026.js) | A számítómotor — a felülettől független, tesztelhető |
 | [`assets/viktoriawp.css`](assets/viktoriawp.css) | Az arculati CSS, változtatás nélkül |
 | [`teszt.html`](teszt.html) | Ellenőrző lap a motorhoz; megnyitáskor lefut |
+| [`ikonok/index.html`](ikonok/index.html) | Ikontár: a bejegyzések kiemelt képeinek előnézete és letöltése |
+| [`assets/ikonok/`](assets/ikonok/) | Az ikonok SVG-ben, mellettük a kész PNG-k |
 
 ## Bér- és jövedelemkalkulátor 2026
 
@@ -89,6 +91,37 @@ egy oszlopba rendeződik és ~2850 px kell, különben elvágja az alját.
 akkor is `about:blank` marad, ha a kalkulátor rendben betöltődött — ebből tehát nem lehet
 következtetni. Az működik-e kérdésre a `contentDocument` ad választ: ha kereszt-origin
 (nem olvasható), akkor betöltött.
+
+## Ikontár
+
+A bejegyzések kiemelt képe kalkulátoronként egy saját ikon, azonos felépítésű képen:
+világoskék (`#F0F0FF`) háttér, balra az ikon, mellette a kalkulátor neve Playfair Displayjel,
+éjkékkel. A méret **1920×667** — ez a honlap kiemelt képeinek szabványa; a kategórialistában
+az Elementor vágás nélkül, arányosan kicsinyíti 375×130-ra.
+
+**Élő cím:** https://ludmilla90ludmilla-ai.github.io/kalkulatorok/ikonok/
+
+Az oldal minden ikonnál mutatja a bannert, alatta a kicsinyített, kártyaméretű előnézetet, és
+egy gombbal letölthető a kész PNG. A képet a böngésző rajzolja canvasra — a név a betöltött
+Playfair Displayjel készül —, tehát nem kell képszerkesztő.
+
+### Új ikon felvétele
+
+1. Rajzold meg az ikont `assets/ikonok/<nev>.svg` néven. Négyzetes `viewBox`, **szöveg nélkül**:
+   az SVG képként rajzolva nem tud webfontot betölteni, ezért a benne lévő betűk mértani
+   formák legyenek (lásd a „Ft"-et a `ber-kalkulator.svg`-ben).
+2. Vedd fel egy sorral az `ikonok/index.html` tetején lévő `IKONOK` tömbbe:
+
+   ```js
+   { fajl: 'afa-kalkulator.svg', nev: 'Áfakalkulátor', kimenet: 'afa-kalkulator-1920x667.png' }
+   ```
+
+3. Nyisd meg az ikontárat, töltsd le a PNG-t, és tedd be az `assets/ikonok/` mappába is,
+   hogy a repóból is elérhető legyen.
+
+**Az ikonok stílusa:** éjkék (`#02023B`) kontúr, egyetlen tömör kiemelt elem, semmi árnyék,
+semmi átmenet, második szín nélkül. A vonalvastagságot úgy válaszd, hogy a kártyaméretű,
+kb. 62 px-es változat se essen szét.
 
 ## Ellenőrzés
 
