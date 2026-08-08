@@ -121,7 +121,7 @@
   /* ---------- Beágyazott (?embed=1) mód ---------- */
 
   .beagyazva .kalk-csak-onalloan { display: none; }
-  .beagyazva body { background: transparent; }
+  .beagyazva body { background: transparent; padding-bottom: 8px; }
   .beagyazva .kalk-fo { padding-block: 0; }
   .beagyazva .kalk-eredmeny { top: 10px; }
 
@@ -515,12 +515,18 @@
 
   /* ---------- Beágyazott mód: magasság a szülő oldalnak ---------- */
 
+  var utolsoMagassag = 0;
+
+  /* A `documentElement.scrollHeight` sosem kisebb az iframe belmagasságánál, ezért ha egyszer
+     túl nagy értéket küldünk, az beragad: a szülő megnöveli a keretet, mi meg már a megnövelt
+     keretet mérjük vissza. A `body` magassága viszont a tartalmat követi, tehát vissza is tud
+     zsugorodni. */
   function magassagotKuld() {
     if (!beagyazva || !window.parent || window.parent === window) return;
-    window.parent.postMessage({
-      tipus: 'kalkulator-magassag',
-      magassag: document.documentElement.scrollHeight
-    }, '*');
+    var magassag = Math.ceil(document.body.getBoundingClientRect().height);
+    if (magassag === utolsoMagassag || magassag === 0) return;
+    utolsoMagassag = magassag;
+    window.parent.postMessage({ tipus: 'kalkulator-magassag', magassag: magassag }, '*');
   }
 
   /* ---------- Bekötés ---------- */
@@ -560,6 +566,15 @@
   });
 
   window.addEventListener('resize', magassagotKuld);
+
+  /* A tartalom magassága a keret szélességétől és a betöltött betűktől is függ, ezért nem
+     elég az ablak átméretezésére figyelni. */
+  if (beagyazva && window.ResizeObserver) {
+    new ResizeObserver(magassagotKuld).observe(document.body);
+  }
+  if (beagyazva && document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(magassagotKuld);
+  }
 
   frissit();
 })();

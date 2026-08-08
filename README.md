@@ -67,7 +67,7 @@ jelenik meg — így az Elementor HTML-widgetjébe illesztve a honlap saját ker
 ```html
 <iframe id="ber-kalkulator"
         src="https://ludmilla90ludmilla-ai.github.io/kalkulatorok/ber-kalkulator/?embed=1"
-        title="Bér- és jövedelemkalkulátor 2026" loading="lazy"
+        title="Bér- és jövedelemkalkulátor 2026"
         style="width:100%;border:0;display:block;" height="1300"></iframe>
 <script>
   window.addEventListener('message', function (esemeny) {
@@ -78,10 +78,16 @@ jelenik meg — így az Elementor HTML-widgetjébe illesztve a honlap saját ker
 </script>
 ```
 
-A scriptet érdemes bent hagyni. A kalkulátor magától küldi a magasságát minden számítás után,
-így az iframe pontosan akkora lesz, amekkora kell. Nélküle a fix `height` marad érvényben —
-az asztali, kétoszlopos elrendezéshez ~1300 px elég, de mobilon egy oszlopba rendeződik és
-~2600 px kell, különben elvágja az alját.
+A scriptet érdemes bent hagyni. A kalkulátor magától küldi a magasságát, valahányszor a
+tartalom mérete változik, így az iframe pontosan akkora lesz, amekkora kell. Nélküle a fix
+`height` marad érvényben — az asztali, kétoszlopos elrendezéshez ~1300 px elég, de mobilon
+egy oszlopba rendeződik és ~2850 px kell, különben elvágja az alját.
+
+**Lazy load:** az `iframe`-en szándékosan nincs `loading="lazy"`. A viktoriawp.eu-n a
+LiteSpeed Cache iframe-lazyload-ja `src="about:blank"`-ra cserélte a címet, és soha nem
+töltötte vissza — a kalkulátor helyén üres doboz maradt. Ha ez előjön, a LiteSpeed Cache →
+Page Optimization → Media Settings alatt kell kivenni az iframe-et a lazy loadból (vagy
+kikapcsolni a *Lazy Load Iframes* kapcsolót), majd üríteni a gyorsítótárat.
 
 ## Ellenőrzés
 
