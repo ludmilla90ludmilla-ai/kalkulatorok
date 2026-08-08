@@ -83,11 +83,12 @@ tartalom mérete változik, így az iframe pontosan akkora lesz, amekkora kell. 
 `height` marad érvényben — az asztali, kétoszlopos elrendezéshez ~1300 px elég, de mobilon
 egy oszlopba rendeződik és ~2850 px kell, különben elvágja az alját.
 
-**Lazy load:** az `iframe`-en szándékosan nincs `loading="lazy"`. A viktoriawp.eu-n a
-LiteSpeed Cache iframe-lazyload-ja `src="about:blank"`-ra cserélte a címet, és soha nem
-töltötte vissza — a kalkulátor helyén üres doboz maradt. Ha ez előjön, a LiteSpeed Cache →
-Page Optimization → Media Settings alatt kell kivenni az iframe-et a lazy loadból (vagy
-kikapcsolni a *Lazy Load Iframes* kapcsolót), majd üríteni a gyorsítótárat.
+**Lazy load – hibakereséshez:** a viktoriawp.eu-n a Smush lazy loadja átírja az `iframe`-et
+`src="about:blank"` + `data-src` + `data-load-mode="0"` alakúra, és `0` módban nem az `src`-t
+állítja vissza, hanem `contentWindow.location.replace()`-szel navigál. Emiatt az `iframe.src`
+akkor is `about:blank` marad, ha a kalkulátor rendben betöltődött — ebből tehát nem lehet
+következtetni. Az működik-e kérdésre a `contentDocument` ad választ: ha kereszt-origin
+(nem olvasható), akkor betöltött.
 
 ## Ellenőrzés
 
