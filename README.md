@@ -16,6 +16,7 @@ adatok nem hagyják el a gépet.
 | [`assets/viktoriawp.css`](assets/viktoriawp.css) | Az arculati CSS, változtatás nélkül |
 | [`teszt.html`](teszt.html) | Ellenőrző lap a motorhoz; megnyitáskor lefut |
 | [`ikonok/index.html`](ikonok/index.html) | Ikontár: a bejegyzések kiemelt képeinek előnézete és letöltése |
+| [`ikonok/LEIRAT.md`](ikonok/LEIRAT.md) | Az ikontár részletes leirata: szabványok, rács, buktatók |
 | [`assets/ikonok/`](assets/ikonok/) | Az ikonok SVG-ben, mellettük a kész PNG-k |
 
 ## Bér- és jövedelemkalkulátor 2026
@@ -99,7 +100,8 @@ világoskék (`#F0F0FF`) háttér, balra az ikon, mellette a kalkulátor neve Pl
 éjkékkel. A méret **1920×667** — ez a honlap kiemelt képeinek szabványa; a kategórialistában
 az Elementor vágás nélkül, arányosan kicsinyíti 375×130-ra.
 
-**Élő cím:** https://ludmilla90ludmilla-ai.github.io/kalkulatorok/ikonok/
+**Élő cím:** https://ludmilla90ludmilla-ai.github.io/kalkulatorok/ikonok/ ·
+**Részletes leirat:** [`ikonok/LEIRAT.md`](ikonok/LEIRAT.md)
 
 Az oldal minden ikonnál mutatja a bannert, alatta a kicsinyített, kártyaméretű előnézetet, és
 egy gombbal letölthető a kész PNG. A képet a böngésző rajzolja canvasra — a név a betöltött
