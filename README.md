@@ -105,6 +105,19 @@ Az oldal minden ikonnál mutatja a bannert, alatta a kicsinyített, kártyamére
 egy gombbal letölthető a kész PNG. A képet a böngésző rajzolja canvasra — a név a betöltött
 Playfair Displayjel készül —, tehát nem kell képszerkesztő.
 
+### Önálló ikon, név nélkül
+
+Ugyanott letölthető a puszta ikon is, **512×512**-ben, két változatban:
+
+| Fájl | Mikor |
+|---|---|
+| `<nev>-512.png` | világoskék (`#F0F0FF`) háttérrel — a bannerekkel egy család |
+| `<nev>-512-atlatszo.png` | átlátszó háttérrel, tetszőleges alapra |
+
+Az átlátszó változatban a kijelzőből kivágott „Ft" és a billentyűk belseje is átlátszó, ezért
+**világos alapra való**. Sötét háttéren a „Ft" eltűnne — oda a világoskék hátterű változatot
+használd.
+
 ### Új ikon felvétele
 
 1. Rajzold meg az ikont `assets/ikonok/<nev>.svg` néven. Négyzetes `viewBox`, **szöveg nélkül**:
@@ -116,8 +129,8 @@ Playfair Displayjel készül —, tehát nem kell képszerkesztő.
    { fajl: 'afa-kalkulator.svg', nev: 'Áfakalkulátor', kimenet: 'afa-kalkulator-1920x667.png' }
    ```
 
-3. Nyisd meg az ikontárat, töltsd le a PNG-t, és tedd be az `assets/ikonok/` mappába is,
-   hogy a repóból is elérhető legyen.
+3. Nyisd meg az ikontárat, töltsd le a bannert és a két négyzetes változatot, és tedd be
+   őket az `assets/ikonok/` mappába is, hogy a repóból is elérhetők legyenek.
 
 **Az ikonok stílusa:** éjkék (`#02023B`) kontúr, egyetlen tömör kiemelt elem, semmi árnyék,
 semmi átmenet, második szín nélkül. A vonalvastagságot úgy válaszd, hogy a kártyaméretű,

@@ -53,6 +53,36 @@
     color: var(--vwp-primary);
   }
 
+  .ikon-negyzetek { margin-top: 34px; }
+
+  .ikon-negyzet-sor { display: flex; flex-wrap: wrap; gap: 30px; }
+
+  .ikon-negyzet {
+    margin: 0;
+    display: grid;
+    gap: 12px;
+    justify-items: start;
+  }
+
+  .ikon-negyzet canvas {
+    display: block;
+    width: 160px;
+    height: 160px;
+    border-radius: var(--vwp-radius-btn);
+  }
+
+  /* Az átlátszó változat alá kockás alap kell, különben nem látszik, hogy átlátszó. */
+  .ikon-negyzet--atlatszo canvas {
+    background-image:
+      linear-gradient(45deg, #E4E4EA 25%, transparent 25%, transparent 75%, #E4E4EA 75%),
+      linear-gradient(45deg, #E4E4EA 25%, transparent 25%, transparent 75%, #E4E4EA 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
+    background-color: #fff;
+  }
+
+  .ikon-negyzet figcaption { font-size: 14px; color: var(--vwp-text); }
+
   .ikon-hiba {
     padding: 16px 20px;
     border-radius: var(--vwp-radius-btn);
@@ -122,6 +152,7 @@
   var IKON_MERET = 320;
   var KOZ = 56;                       /* térköz az ikon és a név között */
   var BETU = '400 104px "Playfair Display", Georgia, serif';
+  var NEGYZET_MERET = 512;            /* az önálló, négyzetes ikon éle */
 
   var E = function (id) { return document.getElementById(id); };
 
@@ -147,6 +178,20 @@
 
     c.drawImage(ikonKep, kezdet, Math.round((MAGASSAG - IKON_MERET) / 2), IKON_MERET, IKON_MERET);
     c.fillText(nev, kezdet + IKON_MERET + KOZ, MAGASSAG / 2);
+  }
+
+  /* Az önálló, négyzetes ikon: ugyanaz a rajz, név nélkül. Átlátszó háttérrel bárhová
+     tehető, világoskékkel pedig a bannerekkel egy családba tartozik. */
+  function negyzetetRajzol(vaszon, ikonKep, atlatszo) {
+    vaszon.width = NEGYZET_MERET;
+    vaszon.height = NEGYZET_MERET;
+    var c = vaszon.getContext('2d');
+    c.clearRect(0, 0, NEGYZET_MERET, NEGYZET_MERET);
+    if (!atlatszo) {
+      c.fillStyle = HATTER;
+      c.fillRect(0, 0, NEGYZET_MERET, NEGYZET_MERET);
+    }
+    c.drawImage(ikonKep, 0, 0, NEGYZET_MERET, NEGYZET_MERET);
   }
 
   function ikontBetolt(fajl) {
@@ -225,6 +270,48 @@
 
     also.appendChild(muveletek);
     doboz.appendChild(also);
+
+    /* Az önálló, négyzetes ikon két változatban */
+    var alap = ikon.fajl.replace(/\.svg$/, '');
+    var negyzetek = document.createElement('div');
+    negyzetek.className = 'ikon-negyzetek';
+
+    var negyzetCimke = document.createElement('span');
+    negyzetCimke.className = 'ikon-cimke';
+    negyzetCimke.textContent = 'Önálló ikon, név nélkül';
+    negyzetek.appendChild(negyzetCimke);
+
+    var sor = document.createElement('div');
+    sor.className = 'ikon-negyzet-sor';
+
+    [
+      { atlatszo: false, felirat: 'Világoskék háttérrel', vege: '-512.png' },
+      { atlatszo: true,  felirat: 'Átlátszó háttérrel',   vege: '-512-atlatszo.png' }
+    ].forEach(function (valtozat) {
+      var alak = document.createElement('figure');
+      alak.className = 'ikon-negyzet' + (valtozat.atlatszo ? ' ikon-negyzet--atlatszo' : '');
+
+      var vaszon = document.createElement('canvas');
+      negyzetetRajzol(vaszon, ikonKep, valtozat.atlatszo);
+      alak.appendChild(vaszon);
+
+      var felirat = document.createElement('figcaption');
+      felirat.textContent = valtozat.felirat;
+      alak.appendChild(felirat);
+
+      var gomb = document.createElement('button');
+      gomb.type = 'button';
+      gomb.className = 'vwp-btn vwp-btn--outline';
+      gomb.textContent = 'PNG letöltése (512×512)';
+      gomb.addEventListener('click', function () { letolt(vaszon, alap + valtozat.vege); });
+      alak.appendChild(gomb);
+
+      sor.appendChild(alak);
+    });
+
+    negyzetek.appendChild(sor);
+    doboz.appendChild(negyzetek);
+
     return doboz;
   }
 
