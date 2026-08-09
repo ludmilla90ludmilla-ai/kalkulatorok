@@ -255,6 +255,11 @@ használd.
 semmi átmenet, második szín nélkül. A vonalvastagságot úgy válaszd, hogy a kártyaméretű,
 kb. 62 px-es változat se essen szét.
 
+**A név legyen rövid.** A bejegyzéslistában a kártya a bannerből csak a középső 1202 px-et
+mutatja, a széleit levágja — a hosszabb felirat kilóg belőle, és az ikont is nagyobbnak
+mutatja a többinél. Ezért „Átalányadó" a felirat, nem „Átalányadó-kalkulátor". A pontos
+számokat lásd: [`ikonok/LEIRAT.md`](ikonok/LEIRAT.md).
+
 ## Ellenőrzés
 
 Mindkét motorhoz tartozik egy ellenőrző lap; megnyitáskor lefutnak, és a lap tetején látszik,

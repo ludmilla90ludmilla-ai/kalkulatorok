@@ -106,21 +106,46 @@ Naptár, mert ez a kalkulátor az egész évről szól. A rácsa:
 
 | Elem | Koordináták | Vonal |
 |---|---|---|
-| Fűzőkarikák | `x=176` és `x=336`, `y=64…106` | kontúr, `stroke-width: 18`, kerek végződés |
-| A test | `x=104 y=100 w=304 h=348 rx=36` | kontúr, `stroke-width: 18` |
+| Fűzőkarikák | `x=192` és `x=320`, `y=64…106` | kontúr, `stroke-width: 18`, kerek végződés |
+| A test | `x=128 y=100 w=256 h=348 rx=36` | kontúr, `stroke-width: 18` |
 | A fejléc | a test belső szélességében, `y=109…189`, felül `rx=27` | tömör, benne kimaszkolva a „%" |
-| Sorok | `x=152…360`, `y=258/314/370` (az utolsó rövidebb) | kontúr, `stroke-width: 10` |
+| Sorok | `x=168…344`, `y=258/314/370` (az utolsó rövidebb) | kontúr, `stroke-width: 10` |
 
-Kiterjedése `x: 95…417`, `y: 55…457` — **szélesebb, mint a bérkalkulátoré, de pontosan
-ugyanolyan magas**. Ez a helyes: a magasság a közös mérték, a szélesség a formától függ.
+Kiterjedése `x: 119…393`, `y: 55…457` — **pixelre ugyanaz a lábnyom, mint a bérkalkulátoré**.
+A test szélessége szándékosan egyezik a számológépével.
 
-**Amiért fekvőbb és karikás:** a bérkalkulátor is álló, lekerekített téglalap sötét sávval a
-tetején. Ha ez is az lenne, kártyaméretben összefolyna vele. A felül kilógó két karika és a
-teljes szélességű fejlécsáv első pillantásra megkülönbözteti a kettőt.
+**Amiért mégsem folyik össze a kettő:** a felül kilógó két fűzőkarika és a teljes szélességű,
+tömör fejlécsáv. A megkülönböztetés a sziluettből jön, nem a méretből — méretben épp hogy
+egyezniük kell.
+
+**Amiért nem szélesebb, pedig lehetne:** a bejegyzéslistában a kártya a bannerből csak a
+középső **1202 px-et** mutatja (a széleit levágja). A szélesebb ikon és a hosszabb felirat
+együtt kilógott ebből, és az ikon nagyobbnak is látszott a másiknál. Lásd a következő pontot.
 
 **Foglalt jelek:** „Ft" a bérkalkulátoré, „%" az átalányadóé. Új ikonhoz olyan jelet válassz,
 ami még nincs használatban — az áfakalkulátornak például a számla vagy blokk formája ad
 elegendő karaktert, nem kell hozzá a „%".
+
+### A név hossza számít
+
+A bejegyzéslistában a kártya a **1920×667-es bannerből csak a középső 1202 px-et mutatja**,
+a széleit levágja (`overflow: hidden`, a kép szélesebbre skálázódik a keretnél). Ami ezen
+kívül esik, egyszerűen eltűnik — és a kilógó felirat azt a benyomást kelti, hogy az ikon
+nagyobb a többinél.
+
+Mérhető szabály: **az ikon és a név együtt ne legyen szélesebb ~1150 px-nél.** Az `IKONOK`
+tömb `nev` mezőjébe ezért rövid címke való, nem a kalkulátor teljes neve:
+
+| Név | A tartalom szélessége | Elfér? |
+|---|---|---|
+| „Bérkalkulátor" | 939 px | igen |
+| „Átalányadó" | 815 px | igen |
+| „Átalányadó-kalkulátor" | 1361 px | **nem**, mindkét szélén levágódik |
+
+Nagyjából **50 px karakterenként** a 104 px-es Playfairrel, plusz ~300 px az ikonra és a
+térközre. Kb. 17 karakternél hosszabb név már nem fér el. Ellenőrizni a legegyszerűbben a
+kiírt PNG festékdobozának megmérésével lehet: a tartalomnak az `x: 366…1567` sávon belül
+kell maradnia.
 
 ### Miért nincs szöveg az SVG-ben
 
