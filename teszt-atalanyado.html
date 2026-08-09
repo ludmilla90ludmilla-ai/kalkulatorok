@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Átalányadó-motor ellenőrzése – Kalkulátorok</title>
+<style>
+  body { font: 15px/1.6 "Segoe UI", system-ui, sans-serif; color: #011111; margin: 40px auto; max-width: 900px; padding: 0 20px; }
+  h1 { font-size: 26px; margin-bottom: 4px; }
+  p.alcim { color: #62636A; margin-top: 0; }
+  #osszegzes { padding: 14px 18px; border-radius: 6px; font-weight: 700; margin: 24px 0; }
+  .rendben { background: #E7F6EC; color: #10633A; }
+  .hibas   { background: #FBEAEA; color: #8C1C1C; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid #DBDBDF; vertical-align: top; }
+  th { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: #62636A; }
+  td.allapot { width: 34px; font-weight: 700; }
+  tr.ok td.allapot { color: #10633A; }
+  tr.bukott td.allapot { color: #8C1C1C; }
+  tr.bukott { background: #FDF4F4; }
+  td.szam { font-variant-numeric: tabular-nums; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<h1>Átalányadó-motor ellenőrzése</h1>
+<p class="alcim">
+  Az <code>assets/atalanyado2026.js</code> kézzel kiszámolt eseteken, és a Novitax 2026-os
+  átalányadó-kalkulátorából kiolvasott értékeken. Az oldal megnyitása futtatja az ellenőrzést.
+</p>
+
+<div id="osszegzes">Futtatás…</div>
+
+<table>
+  <thead>
+    <tr><th class="allapot"></th><th>Eset</th><th>Vizsgált érték</th><th>Várt</th><th>Kapott</th></tr>
+  </thead>
+  <tbody id="sorok"></tbody>
+</table>
+
+<script src="assets/szja2026.js"></script>
+<script src="assets/atalanyado2026.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var esetek = [];
+
+  /* Az `eves` összesítő mezőit ellenőrzi. */
+  function eset(nev, be, vartak) {
+    var eredmeny = ATALANY2026.szamol(be);
+    Object.keys(vartak).forEach(function (mezo) {
+      esetek.push({ nev: nev, mezo: 'eves.' + mezo, vart: vartak[mezo], kapott: eredmeny.eves[mezo] });
+    });
+  }
+
+  /* Egy megnevezett hónap mezőit ellenőrzi (1 = január). */
+  function honap(nev, be, sorszam, vartak) {
+    var ho = ATALANY2026.szamol(be).honapok[sorszam - 1];
+    Object.keys(vartak).forEach(function (mezo) {
+      esetek.push({ nev: nev, mezo: ho.honap + '.' + mezo, vart: vartak[mezo], kapott: ho[mezo] });
+    });
+  }
+
+  function allit(nev, mezo, vart, kapott) {
+    esetek.push({ nev: nev, mezo: mezo, vart: vart, kapott: kapott });
+  }
+
+  var ures = {
+    bevetelek: 0, koltseghanyad: 45, jelleg: 'foallasu', minimumAlap: 'berminimum',
+    szochoKedvezmeny: 'nincs', kiskereskedelem: false,
+    anyakKedvezmenye: 'nincs', fiatal25: false, szemelyi: false, elsoHazas: false,
+    kedvezmenyezettEltartott: 0, eltartott: 0, betegEltartott: 0, csaladiIgenybevett: null
+  };
+
+  function be(valtozok) {
+    var uj = {};
+    Object.keys(ures).forEach(function (k) { uj[k] = ures[k]; });
+    Object.keys(valtozok).forEach(function (k) { uj[k] = valtozok[k]; });
+    return uj;
+  }
+
+  /* ---- Konstansok ------------------------------------------------------ */
+
+  allit('Minimálbér 2026', 'MINIMALBER', 322800, ATALANY2026.MINIMALBER);
+  allit('Garantált bérminimum 2026', 'GARANTALT_BERMINIMUM', 373200, ATALANY2026.GARANTALT_BERMINIMUM);
+  allit('Adómentes rész: az éves minimálbér fele', 'MENTES_KERET', 1936800, ATALANY2026.MENTES_KERET);
+  allit('Értékhatár: az éves minimálbér tízszerese', 'ERTEKHATAR', 38736000, ATALANY2026.ERTEKHATAR);
+  allit('Kiskereskedelmi értékhatár: ötvenszerese', 'ERTEKHATAR_KISKER', 193680000, ATALANY2026.ERTEKHATAR_KISKER);
+  allit('Általános költséghányad 2026-ban 45%', 'KOLTSEGHANYADOK[0]', 45, ATALANY2026.KOLTSEGHANYADOK[0]);
+
+  /* ---- Kereszt-ellenőrzés a Novitax 2026-os kalkulátorával -------------
+     Forrás: novitax.hu/kalkulatorok/2026Atalany/evat26.html, „Januári adatok ismétlése
+     minden hónapra" bekapcsolva, az Összesen oszlop értékei.
+
+     Az eltartottak megadása náluk másképp működik: a „kedvezményezett" és a „figyelembe
+     vehető" eltartottak száma összeadódik, nálunk viszont az `eltartott` a teljes létszám
+     (a kedvezményezettekkel együtt). A C esetben ezért ott kelt = 2, felt = 0 szerepelt. */
+
+  eset('Novitax A: főállású, bérminimum, 45%, havi 1 000 000 Ft', be({
+    bevetelek: 1000000, koltseghanyad: 45, jelleg: 'foallasu', minimumAlap: 'berminimum'
+  }), {
+    bevetel: 12000000, koltseg: 5400000, jovedelem: 6600000, mentes: 1936800, adoalap: 4663200,
+    szochoAlap: 4663200, tbAlap: 4663200, szja: 699480, szocho: 606216, tbJarulek: 862692,
+    fizetendoJarulek: 862692, kozterhek: 2168388, marado: 9831612
+  });
+
+  honap('Novitax A – január', be({
+    bevetelek: 1000000, koltseghanyad: 45, jelleg: 'foallasu', minimumAlap: 'berminimum'
+  }), 1, {
+    jovedelem: 550000, mentes: 550000, adoalap: 0, szochoAlap: 373200, tbAlap: 373200,
+    szja: 0, tbJarulek: 69042, fizetendoSzocho: 48516, kozterhek: 117558, marado: 882442
+  });
+
+  eset('Novitax B: főállás melletti, 80%, havi 500 000 Ft', be({
+    bevetelek: 500000, koltseghanyad: 80, jelleg: 'mellett'
+  }), {
+    bevetel: 6000000, koltseg: 4800000, jovedelem: 1200000, mentes: 1200000, adoalap: 0,
+    szochoAlap: 0, tbAlap: 0, szja: 0, szocho: 0, tbJarulek: 0, kozterhek: 0, marado: 6000000
+  });
+
+  eset('Novitax C: főállású, minimálbér, 45%, havi 800 000 Ft, 2 kedvezményezett eltartott', be({
+    bevetelek: 800000, koltseghanyad: 45, jelleg: 'foallasu', minimumAlap: 'minimalber',
+    kedvezmenyezettEltartott: 2, eltartott: 2
+  }), {
+    bevetel: 9600000, koltseg: 4320000, jovedelem: 5280000, mentes: 1936800, adoalap: 3343200,
+    szochoAlap: 3873600, tbAlap: 3873600, adoelolegAlapja: 0, szja: 0, szocho: 503568,
+    tbJarulek: 716616, csaladiJarulekkedvezmeny: 377376, fizetendoJarulek: 339240,
+    kozterhek: 842808, marado: 8757192
+  });
+
+  eset('Novitax D: nyugdíjas, 90%, havi 2 000 000 Ft', be({
+    bevetelek: 2000000, koltseghanyad: 90, jelleg: 'nyugdijas'
+  }), {
+    bevetel: 24000000, jovedelem: 2400000, mentes: 1936800, adoalap: 463200,
+    szochoAlap: 0, tbAlap: 0, szja: 69480, szocho: 0, tbJarulek: 0,
+    kozterhek: 69480, marado: 23930520
+  });
+
+  eset('Novitax E: főállású, bérminimum, 45%, havi 400 000 Ft, személyi kedv. + megváltozott munkaképesség', be({
+    bevetelek: 400000, koltseghanyad: 45, jelleg: 'foallasu', minimumAlap: 'berminimum',
+    szemelyi: true, szochoKedvezmeny: 'megvaltozott'
+  }), {
+    bevetel: 4800000, koltseg: 2160000, jovedelem: 2640000, mentes: 1936800, adoalap: 703200,
+    szochoAlap: 4478400, tbAlap: 4478400, adoelolegAlapja: 337200, szja: 50580,
+    szocho: 582192, szochoKedvezmeny: 582192, fizetendoSzocho: 0,
+    tbJarulek: 828504, kozterhek: 879084, marado: 3920916
+  });
+
+  /* ---- Az adómentes keret göngyölítése --------------------------------- */
+
+  // Havi 550 000 Ft jövedelemnél a keret a negyedik hónapban fogy el.
+  honap('Göngyölt mentes rész – 4. hónap a részleges', be({
+    bevetelek: 1000000, koltseghanyad: 45
+  }), 4, { jovedelem: 550000, mentes: 286800, adoalap: 263200 });
+
+  honap('Göngyölt mentes rész – 5. hónaptól nincs mentesség', be({
+    bevetelek: 1000000, koltseghanyad: 45
+  }), 5, { mentes: 0, adoalap: 550000 });
+
+  // Egyetlen hónapban befolyó teljes éves bevétel: a keret azonnal elfogy.
+  var egyHonap = [11000000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  honap('Egyetlen hónap teljes bevétele – a mentes rész egyben fogy el', be({
+    bevetelek: egyHonap, koltseghanyad: 45
+  }), 1, { jovedelem: 6050000, mentes: 1936800, adoalap: 4113200 });
+
+  eset('Egyetlen hónap teljes bevétele – az éves adóalap ugyanannyi, mint egyenletesnél', be({
+    bevetelek: egyHonap, koltseghanyad: 45
+  }), { jovedelem: 6050000, mentes: 1936800, adoalap: 4113200 });
+
+  /* ---- Negyedéves göngyölítés ------------------------------------------ */
+
+  // A negyedév mindhárom hónapja ugyanazt a járulékalapot kapja, akkor is,
+  // ha a bevétel egyenetlenül oszlik el a negyedéven belül.
+  var egyenetlen = [8000000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  var q = ATALANY2026.szamol(be({ bevetelek: egyenetlen, koltseghanyad: 45, jelleg: 'mellett' }));
+  allit('Negyedéven belül azonos járulékalap', 'jan.tbAlap === márc.tbAlap',
+    true, q.honapok[0].tbAlap === q.honapok[2].tbAlap);
+  allit('Negyedéves alap: a negyedév adóalapjának harmada', 'jan.tbAlap',
+    Math.round((8000000 * 0.55 - 1936800) / 3), q.honapok[0].tbAlap);
+  allit('A későbbi negyedévek alapja nulla', 'ápr.tbAlap', 0, q.honapok[3].tbAlap);
+
+  // Főállásúnál a minimumalap akkor is jár, ha nincs bevétel.
+  var nulla = ATALANY2026.szamol(be({ bevetelek: 0, jelleg: 'foallasu', minimumAlap: 'berminimum' }));
+  allit('Bevétel nélkül is jár a minimumalap', 'jan.tbAlap', 373200, nulla.honapok[0].tbAlap);
+  allit('Bevétel nélkül is fizetendő járulék', 'eves.fizetendoJarulek', 69042 * 12, nulla.eves.fizetendoJarulek);
+  allit('Bevétel nélkül is fizetendő szocho', 'eves.fizetendoSzocho', 48516 * 12, nulla.eves.fizetendoSzocho);
+  allit('Bevétel nélkül nincs szja', 'eves.szja', 0, nulla.eves.szja);
+
+  allit('Minimumalap főállás mellett nincs', 'minimumJarulekalap',
+    0, ATALANY2026.minimumJarulekalap('mellett', 'berminimum'));
+  allit('Minimumalap nyugdíjasnál nincs', 'minimumJarulekalap',
+    0, ATALANY2026.minimumJarulekalap('nyugdijas', 'berminimum'));
+
+  /* ---- Kedvezmények ----------------------------------------------------- */
+
+  eset('NÉTAK: a teljes adóalap mentes', be({
+    bevetelek: 1000000, anyakKedvezmenye: 'netak'
+  }), { adoelolegAlapja: 0, szja: 0 });
+
+  // Havi 1 650 000 Ft jövedelemnél az első hónap adóalapja nulla (a mentes rész elnyeli),
+  // ezért ott a keret elvész: csak 11 hónapban tud érvényesülni.
+  eset('30 év alatti anya: keretes kedvezmény (havi 715 765 Ft)', be({
+    bevetelek: 3000000, anyakKedvezmenye: 'anya30'
+  }), { adoelolegAlapja: 12 * 1650000 - 1936800 - 11 * 715765 });
+
+  allit('30 év alatti anya: a nulla adóalapú hónapban elvész a keret', 'jan.elveszett',
+    715765, ATALANY2026.szamol(be({ bevetelek: 3000000, anyakKedvezmenye: 'anya30' }))
+      .kedvezmenyek[0].elveszett);
+
+  eset('25 év alatti fiatal, havi 1 000 000 Ft bevétel', be({
+    bevetelek: 1000000, fiatal25: true
+  }), { adoelolegAlapja: 0, szja: 0 });
+
+  eset('Első házasok kedvezménye havi 33 335 Ft-tal csökkenti az adóalapot', be({
+    bevetelek: 1000000, elsoHazas: true
+  }), { adoelolegAlapja: 4663200 - 8 * 33335 - 33335 });
+
+  // A 4. hónapban az adóalap 263 200 Ft, ez elnyeli a 33 335 Ft-ot; az 1–3. hónapban nulla,
+  // ott a kedvezmény elvész.
+  honap('Első házasok kedvezménye a nulla adóalapú hónapban elvész', be({
+    bevetelek: 1000000, elsoHazas: true
+  }), 1, { adoelolegAlapja: 0 });
+
+  eset('Megosztott családi kedvezmény: a felét érvényesíti', be({
+    bevetelek: 1000000, kedvezmenyezettEltartott: 2, eltartott: 2, csaladiIgenybevett: 266660
+  }), { adoelolegAlapja: 4663200 - 8 * 266660 - 263200 });
+
+  honap('Családi kedvezmény átfordul járulékkedvezménybe', be({
+    bevetelek: 800000, jelleg: 'foallasu', minimumAlap: 'minimalber',
+    kedvezmenyezettEltartott: 2, eltartott: 2
+  }), 1, { adoelolegAlapja: 0, csaladiMaradek: 533320, tbJarulek: 59718,
+           csaladiJarulekkedvezmeny: 59718, fizetendoJarulek: 0 });
+
+  // A járulékkedvezmény a tényleges jövedelem 18,5%-át sem lépheti túl.
+  honap('A járulékkedvezmény felső korlátja a jövedelem 18,5%-a', be({
+    bevetelek: [100000, 0, 0, 3000000, 0, 0, 0, 0, 0, 0, 0, 0], koltseghanyad: 90,
+    jelleg: 'foallasu', minimumAlap: 'berminimum', kedvezmenyezettEltartott: 3, eltartott: 3
+  }), 1, { jovedelem: 10000, csaladiJarulekkedvezmeny: 1850 });
+
+  /* ---- Figyelmeztetések ------------------------------------------------- */
+
+  function figyelmeztetes(eredmeny, tipus) {
+    return eredmeny.figyelmeztetesek.some(function (f) { return f.tipus === tipus; });
+  }
+
+  allit('Az értékhatár túllépése figyelmeztet', 'ertekhatar', true,
+    figyelmeztetes(ATALANY2026.szamol(be({ bevetelek: 3300000 })), 'ertekhatar'));
+  allit('Az értékhatár alatt nincs figyelmeztetés', 'ertekhatar', false,
+    figyelmeztetes(ATALANY2026.szamol(be({ bevetelek: 3200000 })), 'ertekhatar'));
+  allit('Kiskereskedelemnél magasabb az értékhatár', 'ertekhatar', false,
+    figyelmeztetes(ATALANY2026.szamol(be({ bevetelek: 3300000, kiskereskedelem: true })), 'ertekhatar'));
+  allit('A mentes keret elfogyása figyelmeztet', 'mentes', true,
+    figyelmeztetes(ATALANY2026.szamol(be({ bevetelek: 1000000 })), 'mentes'));
+
+  /* ---- Zárt könyvelés: a havi értékek összege az éves ------------------- */
+
+  var elteresek = 0;
+  var maradoElteres = 0;
+  for (var i = 0; i < 200; i++) {
+    var bevetelek = [];
+    for (var h = 0; h < 12; h++) bevetelek.push(Math.round(Math.random() * 4000000));
+
+    var minta = be({
+      bevetelek: bevetelek,
+      koltseghanyad: ATALANY2026.KOLTSEGHANYADOK[i % 3],
+      jelleg: ['foallasu', 'mellett', 'nyugdijas'][i % 3],
+      minimumAlap: i % 2 === 0 ? 'berminimum' : 'minimalber',
+      szochoKedvezmeny: i % 5 === 0 ? 'megvaltozott' : 'nincs',
+      kedvezmenyezettEltartott: i % 4,
+      eltartott: i % 4,
+      betegEltartott: i % 7 === 0 ? 1 : 0,
+      fiatal25: i % 5 === 0,
+      szemelyi: i % 3 === 0,
+      elsoHazas: i % 6 === 0,
+      anyakKedvezmenye: i % 11 === 0 ? 'anya30' : 'nincs'
+    });
+
+    var e = ATALANY2026.szamol(minta);
+
+    var haviOsszeg = 0;
+    var haviKozteher = 0;
+    e.honapok.forEach(function (ho) {
+      haviOsszeg += ho.bevetel;
+      haviKozteher += ho.kozterhek;
+      if (ho.marado !== ho.bevetel - ho.kozterhek) maradoElteres++;
+      if (ho.adoalap !== ho.jovedelem - ho.mentes) maradoElteres++;
+    });
+    if (haviOsszeg !== e.eves.bevetel) elteresek++;
+    if (haviKozteher !== e.eves.kozterhek) elteresek++;
+    if (e.eves.marado !== e.eves.bevetel - e.eves.kozterhek) elteresek++;
+    if (e.eves.mentes > ATALANY2026.MENTES_KERET) elteresek++;
+  }
+  allit('200 véletlen év: a havi értékek összege az éves', 'eltérés', 0, elteresek);
+  allit('200 véletlen év: bevétel − közterhek = marad', 'eltérés', 0, maradoElteres);
+
+  /* ---- Kiírás ---------------------------------------------------------- */
+
+  var sorok = document.getElementById('sorok');
+  var bukott = 0;
+
+  esetek.forEach(function (e) {
+    var jo = e.vart === e.kapott;
+    if (!jo) bukott++;
+    var tr = document.createElement('tr');
+    tr.className = jo ? 'ok' : 'bukott';
+    tr.innerHTML =
+      '<td class="allapot">' + (jo ? '✓' : '✕') + '</td>' +
+      '<td>' + e.nev + '</td>' +
+      '<td><code>' + e.mezo + '</code></td>' +
+      '<td class="szam">' + e.vart + '</td>' +
+      '<td class="szam">' + e.kapott + '</td>';
+    sorok.appendChild(tr);
+  });
+
+  var osszegzes = document.getElementById('osszegzes');
+  osszegzes.className = bukott === 0 ? 'rendben' : 'hibas';
+  osszegzes.textContent = bukott === 0
+    ? esetek.length + ' ellenőrzés, mind rendben.'
+    : esetek.length + ' ellenőrzésből ' + bukott + ' megbukott.';
+  document.title = (bukott === 0 ? '✓ ' : '✕ ') + document.title;
+})();
+</script>
+
+</body>
+</html>

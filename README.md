@@ -12,9 +12,12 @@ adatok nem hagyják el a gépet.
 |---|---|
 | [`index.html`](index.html) | Gyűjtő nyitóoldal, innen nyílnak a kalkulátorok |
 | [`ber-kalkulator/index.html`](ber-kalkulator/index.html) | Bér- és jövedelemkalkulátor 2026 |
-| [`assets/szja2026.js`](assets/szja2026.js) | A számítómotor — a felülettől független, tesztelhető |
+| [`atalanyado-kalkulator/index.html`](atalanyado-kalkulator/index.html) | Átalányadó-kalkulátor 2026 |
+| [`assets/szja2026.js`](assets/szja2026.js) | A bérszámítás motorja — a felülettől független, tesztelhető |
+| [`assets/atalanyado2026.js`](assets/atalanyado2026.js) | Az átalányadó motorja; a közös kedvezménykereteket az `szja2026.js`-ből veszi |
 | [`assets/viktoriawp.css`](assets/viktoriawp.css) | Az arculati CSS, változtatás nélkül |
-| [`teszt.html`](teszt.html) | Ellenőrző lap a motorhoz; megnyitáskor lefut |
+| [`teszt.html`](teszt.html) | Ellenőrző lap a bérmotorhoz; megnyitáskor lefut |
+| [`teszt-atalanyado.html`](teszt-atalanyado.html) | Ellenőrző lap az átalányadó-motorhoz |
 | [`ikonok/index.html`](ikonok/index.html) | Ikontár: a bejegyzések kiemelt képeinek előnézete és letöltése |
 | [`ikonok/LEIRAT.md`](ikonok/LEIRAT.md) | Az ikontár részletes leirata: szabványok, rács, buktatók |
 | [`assets/ikonok/`](assets/ikonok/) | Az ikonok SVG-ben, mellettük a kész PNG-k |
@@ -62,6 +65,49 @@ munkavállalót, a szociális hozzájárulási adó kedvezményeit (pl. munkaer�
 az egyszerűsített foglalkoztatást, az önálló tevékenységet és a nem egész hónapos
 jogviszonyokat. Tájékoztató jellegű: nem helyettesíti a bérszámfejtést.
 
+## Átalányadó-kalkulátor 2026
+
+Átalányadózó egyéni vállalkozó **egész évi** adóját és járulékát számolja. Azért éves, mert
+ennél az adózási módnál a hónapok nem függetlenek egymástól:
+
+- az **adómentes rész** (az éves minimálbér fele) nem havi keret, hanem az év elejétől
+  göngyölítve fogy — a bevétel eloszlása tehát megváltoztatja az éves adót is;
+- a **járulékalap negyedévente** áll össze: a negyedév végéig göngyölt adóalapból levonjuk,
+  amit a korábbi negyedévek már lekötöttek, elosztjuk hárommal, és ez lesz a negyedév
+  mindhárom hónapjának alapja — de legalább a minimumalap.
+
+Alapesetben egyetlen havi bevételt kell megadni (minden hónapra ugyanaz); a *„A havi bevételek
+eltérnek"* kapcsolóval mind a 12 hónap külön írható. Az eredménykártya éves összesítést mutat,
+alatta kinyitható a hónapról hónapra bontás.
+
+Az adóalap-kedvezmények ugyanazok és ugyanabban a sorrendben, mint a bérkalkulátorban — a
+kereteket és a családi kedvezmény sávjait a motor közvetlenül az
+[`assets/szja2026.js`](assets/szja2026.js)-ből veszi, hogy a két kalkulátor ne tudjon
+kettéválni.
+
+### 2026-os értékek
+
+| Tétel | Érték |
+|---|---|
+| Költséghányad | 45% általános · 80% a felsorolt tevékenységek · 90% kizárólag kiskereskedelem |
+| Adómentes jövedelemrész | 1 936 800 Ft/év (az éves minimálbér fele), göngyölítve |
+| Bevételi értékhatár | 38 736 000 Ft (az éves minimálbér tízszerese) · kiskereskedelemnél 193 680 000 Ft |
+| Garantált bérminimum | 373 200 Ft/hó |
+| Minimálbér | 322 800 Ft/hó |
+| Szocho minimumalapja főállásúnál | a minimum járulékalap 100%-a (2025-ben még 112,5% volt) |
+| Megváltozott munkaképességű vállalkozó szocho-kedvezménye | a minimálbér kétszereséig, 645 600 Ft/hó |
+
+A minimálbér, a kedvezménykeretek és a családi kedvezmény sávjai az `szja2026.js` tetejéről
+jönnek; az átalányadóra jellemző konstansok az
+[`assets/atalanyado2026.js`](assets/atalanyado2026.js) tetején laknak.
+
+### Amit nem tud
+
+Azt feltételezi, hogy a vállalkozás jellege, a járulékalap és a kedvezmények az egész évben
+változatlanok — csak a bevétel bontható hónapokra. Nem kezeli az áfát, a tevékenységváltást,
+a szünetelést, a táppénzes és egyéb kieső időszakokat, a nem átalányadós jövedelmeket, sem az
+átalányadózásból év közben történő kilépést. Tájékoztató jellegű: nem helyettesíti a könyvelést.
+
 ## Beágyazás a honlapba
 
 A kalkulátor `?embed=1` paraméterrel fejléc, hero és lábléc nélkül, átlátszó háttérrel
@@ -80,6 +126,18 @@ jelenik meg — így az Elementor HTML-widgetjébe illesztve a honlap saját ker
   });
 </script>
 ```
+
+Az átalányadó-kalkulátorhoz ugyanez, más `id`-vel és `src`-vel:
+
+```html
+<iframe id="atalanyado-kalkulator"
+        src="https://ludmilla90ludmilla-ai.github.io/kalkulatorok/atalanyado-kalkulator/?embed=1"
+        title="Átalányadó-kalkulátor 2026"
+        style="width:100%;border:0;display:block;" height="1600"></iframe>
+```
+
+A fogadó script közös: az üzenet `tipus`-a mindegyik kalkulátornál `kalkulator-magassag`, csak
+a `getElementById`-t kell a megfelelő `id`-re állítani (vagy egyszerre több iframe-et kezelni).
 
 A scriptet érdemes bent hagyni. A kalkulátor magától küldi a magasságát, valahányszor a
 tartalom mérete változik, így az iframe pontosan akkora lesz, amekkora kell. Nélküle a fix
@@ -140,12 +198,26 @@ kb. 62 px-es változat se essen szét.
 
 ## Ellenőrzés
 
-Nyisd meg a [`teszt.html`](teszt.html)-t böngészőben. Kézzel kiszámolt eseteket futtat
-(minimálbér, 25 év alatti a keret alatt és fölött, egy-, két- és háromgyermekes családi
-kedvezmény, a családi járulékkedvezménybe átforduló eset, tartósan beteg eltartott, NÉTAK,
-megosztott kedvezmény), plusz 400 véletlen bemeneten ellenőrzi, hogy a nettóból visszaszámolt
-bruttó visszavezetve 1 Ft-on belül ugyanazt a nettót adja. A lap tetején látszik, hány
-ellenőrzés futott le és hány bukott meg.
+Mindkét motorhoz tartozik egy ellenőrző lap; megnyitáskor lefutnak, és a lap tetején látszik,
+hány ellenőrzés futott le és hány bukott meg (a böngészőfül címében is: `✓` vagy `✕`).
+
+[`teszt.html`](teszt.html) — a bérmotor. Kézzel kiszámolt eseteket futtat (minimálbér, 25 év
+alatti a keret alatt és fölött, egy-, két- és háromgyermekes családi kedvezmény, a családi
+járulékkedvezménybe átforduló eset, tartósan beteg eltartott, NÉTAK, megosztott kedvezmény),
+plusz 400 véletlen bemeneten ellenőrzi, hogy a nettóból visszaszámolt bruttó visszavezetve
+1 Ft-on belül ugyanazt a nettót adja.
+
+[`teszt-atalanyado.html`](teszt-atalanyado.html) — az átalányadó-motor. A konstansokon és a
+kézzel számolt eseteken túl **kereszt-ellenőrzést** is végez: öt forgatókönyv a Novitax
+2026-os átalányadó-kalkulátorából (`novitax.hu/kalkulatorok/2026Atalany/evat26.html`)
+kiolvasott értékeivel — főállású mindkét minimumalappal, főállás melletti, nyugdíjas,
+kedvezményekkel és anélkül. Ezekben az éves összesítők soronként egyeznek. Mellette 200
+véletlen évre ellenőrzi, hogy a havi értékek összege az éves, és hogy a bevételből a
+közterheket levonva pontosan a „marad" jön ki.
+
+**Figyelem az eltartottak megadására:** a Novitaxnál a „kedvezményezett" és a „figyelembe
+vehető" eltartott két külön, összeadódó szám; nálunk az `eltartott` a teljes létszám, a
+kedvezményezettekkel együtt. Összehasonlításkor a Novitaxban `felt = 0`-t kell megadni.
 
 ## Közzététel
 

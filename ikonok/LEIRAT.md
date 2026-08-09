@@ -100,6 +100,28 @@ ikon ugyanakkorának *látszik* majd egymás mellett.
 18-as fővonal ott ~2 px, a 10-es másodlagos vonal ~1,2 px — ez még nem esik szét. Vékonyabb
 vonalakkal a kártyanézet elmosódna.
 
+### A második ikon: `atalanyado-kalkulator.svg`
+
+Naptár, mert ez a kalkulátor az egész évről szól. A rácsa:
+
+| Elem | Koordináták | Vonal |
+|---|---|---|
+| Fűzőkarikák | `x=176` és `x=336`, `y=64…106` | kontúr, `stroke-width: 18`, kerek végződés |
+| A test | `x=104 y=100 w=304 h=348 rx=36` | kontúr, `stroke-width: 18` |
+| A fejléc | a test belső szélességében, `y=109…189`, felül `rx=27` | tömör, benne kimaszkolva a „%" |
+| Sorok | `x=152…360`, `y=258/314/370` (az utolsó rövidebb) | kontúr, `stroke-width: 10` |
+
+Kiterjedése `x: 95…417`, `y: 55…457` — **szélesebb, mint a bérkalkulátoré, de pontosan
+ugyanolyan magas**. Ez a helyes: a magasság a közös mérték, a szélesség a formától függ.
+
+**Amiért fekvőbb és karikás:** a bérkalkulátor is álló, lekerekített téglalap sötét sávval a
+tetején. Ha ez is az lenne, kártyaméretben összefolyna vele. A felül kilógó két karika és a
+teljes szélességű fejlécsáv első pillantásra megkülönbözteti a kettőt.
+
+**Foglalt jelek:** „Ft" a bérkalkulátoré, „%" az átalányadóé. Új ikonhoz olyan jelet válassz,
+ami még nincs használatban — az áfakalkulátornak például a számla vagy blokk formája ad
+elegendő karaktert, nem kell hozzá a „%".
+
 ### Miért nincs szöveg az SVG-ben
 
 Az SVG-t a böngésző **képként** rajzolja a vászonra, és ebben a módban nem tud webfontot
