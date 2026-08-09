@@ -21,7 +21,10 @@
     align-items: start;
   }
 
-  @media (max-width: 899px) {
+  /* A töréspont azért 780px és nem 900, mert a honlap bejegyzéssávja 832px széles: ott is
+     kétoszlopos elrendezést akarunk. A 780–1023px sávban szűkebb margó és kisebb betű kell
+     hozzá — lásd lentebb. */
+  @media (max-width: 779px) {
     .kalk-munkaterulet { grid-template-columns: minmax(0, 1fr); gap: 30px; }
   }
 
@@ -48,8 +51,55 @@
   .kalk-kapcsolo input { margin: 4px 0 0; width: 18px; height: 18px; accent-color: var(--vwp-primary); flex: none; }
   .kalk-kapcsolo label { font-size: 15px; font-weight: 600; color: var(--vwp-ink); cursor: pointer; }
 
-  .kalk-blokk { margin-top: 40px; }
-  .kalk-blokk > h2 { font-size: 22px; line-height: 30px; margin-bottom: 18px; }
+  /* ---------- Összecsukható szakaszok ----------
+     A becsukott szakasz helyet spórol, de nem rejthet el információt: a fejléc mindig
+     kiírja az aktuális beállítást. */
+
+  .kalk-szakasz { border-top: 1px solid var(--vwp-border); }
+  .kalk-szakasz:last-of-type { border-bottom: 1px solid var(--vwp-border); }
+
+  .kalk-szakasz > summary {
+    display: flex;
+    align-items: center;
+    gap: 8px 14px;
+    flex-wrap: wrap;
+    padding: 17px 4px 17px 0;
+    cursor: pointer;
+    list-style: none;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--vwp-ink);
+  }
+  .kalk-szakasz > summary::-webkit-details-marker { display: none; }
+  .kalk-szakasz > summary:focus-visible { outline: 2px solid var(--vwp-primary); outline-offset: 3px; }
+
+  /* A `min-width: 0` nem elhagyható: a flex elemek alapértelmezett `min-width: auto`-ja
+     miatt az állapotszöveg nem tudna a tartalmánál keskenyebbre tördelődni, és keskeny
+     kijelzőn kilógna a fejlécből. */
+  .kalk-szakasz__allapot {
+    margin-left: auto;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--vwp-text);
+    text-align: right;
+  }
+
+  /* Nyíl vonalakból, nem betűből: így nem múlik a betűkészlet jelkészletén. */
+  .kalk-szakasz > summary::after {
+    content: '';
+    flex: none;
+    box-sizing: content-box;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--vwp-primary);
+    border-bottom: 2px solid var(--vwp-primary);
+    transform: translateY(-2px) rotate(45deg);
+    transition: transform .15s ease;
+  }
+  .kalk-szakasz[open] > summary::after { transform: translateY(2px) rotate(-135deg); }
+
+  .kalk-szakasz__tartalom { padding-bottom: 26px; }
 
   /* ---------- Eredménykártya ---------- */
 
@@ -60,7 +110,7 @@
     position: sticky;
     top: 90px;
   }
-  @media (max-width: 899px) { .kalk-eredmeny { position: static; padding: 28px 24px; } }
+  @media (max-width: 779px) { .kalk-eredmeny { position: static; padding: 28px 24px; } }
 
   .kalk-fooszeg__cimke {
     font-family: var(--vwp-font-accent);
@@ -117,6 +167,19 @@
   .kalk-muveletek .vwp-btn { padding: 12px 20px; }
 
   .kalk-jogi { font-size: 13px; line-height: 1.6; color: var(--vwp-text); max-width: 80ch; }
+
+  /* Szűk kétoszlopos sáv: a honlapba ágyazva ~376px jut egy oszlopra. Szűkebb belső margóval
+     és egy fokkal kisebb betűvel kevesebb tételnév törik két sorba. A blokknak a fenti
+     alapértékek UTÁN kell állnia, különben azok írnák felül (a médialekérdezés nem növeli
+     a specifikusságot). */
+  @media (min-width: 780px) and (max-width: 1023px) {
+    .kalk-munkaterulet { gap: 26px; }
+    .kalk-eredmeny { padding: 28px 22px; }
+    .kalk-fooszeg__cimke { font-size: 16px; }
+    .kalk-fooszeg__ertek { font-size: 36px; }
+    .kalk-tetelek h3 { font-size: 12px; }
+    .kalk-sor { font-size: 14px; }
+  }
 
   /* ---------- Beágyazott (?embed=1) mód ---------- */
 
@@ -189,10 +252,13 @@
           </div>
         </div>
 
-        <div class="kalk-blokk">
-          <h2>Kedvezmények</h2>
+        <details class="kalk-szakasz" id="kedvezmenySzakasz" style="margin-top:34px;">
+          <summary>
+            <span>Kedvezmények</span>
+            <span class="kalk-szakasz__allapot" id="kedvezmenyAllapot">Nincs</span>
+          </summary>
 
-          <div class="kalk-mezok">
+          <div class="kalk-mezok kalk-szakasz__tartalom">
             <div>
               <label class="vwp-label" for="anyak">Anyák kedvezménye</label>
               <select class="vwp-select" id="anyak" name="anyak">
@@ -229,10 +295,13 @@
               </label>
             </div>
           </div>
-        </div>
+        </details>
 
-        <div class="kalk-blokk">
-          <h2>Családi kedvezmény</h2>
+        <details class="kalk-szakasz" id="csaladiSzakasz">
+          <summary>
+            <span>Családi kedvezmény</span>
+            <span class="kalk-szakasz__allapot" id="csaladiAllapot">Nincs</span>
+          </summary>
 
           <div class="kalk-mezok kalk-mezok--parban">
             <div>
@@ -252,7 +321,7 @@
             </div>
           </div>
 
-          <div class="kalk-mezok" style="margin-top:18px;">
+          <div class="kalk-mezok kalk-szakasz__tartalom" style="margin-top:18px;">
             <div class="kalk-kapcsolo">
               <input type="checkbox" id="megosztas" name="megosztas">
               <label for="megosztas">Megosztva érvényesítem
@@ -265,20 +334,21 @@
               <span class="kalk-sug" id="csaladiSug"></span>
             </div>
           </div>
-        </div>
+        </details>
 
-        <div class="kalk-blokk">
-          <details>
-            <summary style="cursor:pointer;font-weight:600;color:var(--vwp-ink);">További adat az éves összesítőhöz</summary>
-            <div class="kalk-mezok" style="margin-top:18px;">
-              <div>
-                <label class="vwp-label" for="masJovedelem">Éves, mástól kapott jövedelem</label>
-                <input class="vwp-input" id="masJovedelem" name="masJovedelem" type="text" inputmode="numeric" value="0">
-                <span class="kalk-sug">Más kifizetőtől származó éves összevont jövedelem. Csak az éves adóalap sorát mozgatja.</span>
-              </div>
+        <details class="kalk-szakasz" id="masJovedelemSzakasz">
+          <summary>
+            <span>Éves összesítő</span>
+            <span class="kalk-szakasz__allapot" id="masJovedelemAllapot">Nincs más jövedelem</span>
+          </summary>
+          <div class="kalk-mezok kalk-szakasz__tartalom">
+            <div>
+              <label class="vwp-label" for="masJovedelem">Éves, mástól kapott jövedelem</label>
+              <input class="vwp-input" id="masJovedelem" name="masJovedelem" type="text" inputmode="numeric" value="0">
+              <span class="kalk-sug">Más kifizetőtől származó éves összevont jövedelem. Csak az éves adóalap sorát mozgatja.</span>
             </div>
-          </details>
-        </div>
+          </div>
+        </details>
       </form>
 
       <!-- ---------------- Eredmény ---------------- -->
@@ -446,7 +516,35 @@
     E('csaladiSug').textContent = 'Igénybe vehető havi keret: ' + ft(eredmeny.csaladi.igenybeveheto) + '.';
 
     megjegyzes(be, eredmeny);
+    szakaszAllapotok(be);
     magassagotKuld();
+  }
+
+  /* ---------- A szakaszok fejlécében látszó állapot ----------
+     Enélkül a becsukott szakasz elrejtené a beállítást, és valaki úgy kaphatna más
+     eredményt, hogy észre sem veszi, hogy ott volt egy választás. */
+
+  function szakaszAllapotok(be) {
+    var kedvezmenyek = [];
+    if (be.anyakKedvezmenye !== 'nincs') {
+      kedvezmenyek.push(be.anyakKedvezmenye === 'anya30' ? '30 év alatti anya' : 'anyák kedvezménye');
+    }
+    if (be.fiatal25) kedvezmenyek.push('25 év alattiak');
+    if (be.szemelyi) kedvezmenyek.push('személyi');
+    if (be.elsoHazas) kedvezmenyek.push('első házasok');
+    E('kedvezmenyAllapot').textContent = kedvezmenyek.length ? kedvezmenyek.join(', ') : 'Nincs';
+
+    if (be.kedvezmenyezettEltartott === 0) {
+      E('csaladiAllapot').textContent = 'Nincs';
+    } else {
+      var csaladi = be.kedvezmenyezettEltartott + ' kedvezményezett eltartott';
+      if (be.csaladiIgenybevett !== null) csaladi += ', megosztva';
+      E('csaladiAllapot').textContent = csaladi;
+    }
+
+    E('masJovedelemAllapot').textContent = be.masJovedelem > 0
+      ? 'Más jövedelem: ' + ft(be.masJovedelem)
+      : 'Nincs más jövedelem';
   }
 
   function megjegyzes(be, eredmeny) {
@@ -550,6 +648,27 @@
 
   document.querySelectorAll('[data-irany]').forEach(function (gomb) {
     gomb.addEventListener('click', function () { iranyt(gomb.dataset.irany); });
+  });
+
+  /* Minden szakasz nyitása-csukása megváltoztatja a lap magasságát. */
+  document.querySelectorAll('details').forEach(function (szakasz) {
+    szakasz.addEventListener('toggle', magassagotKuld);
+  });
+
+  /* Nyomtatáskor minden szakasz nyitva legyen, különben a beállítások lemaradnának a
+     papírról. Utána visszaáll az eredeti állapot. */
+  var nyomtatasElott = null;
+  window.addEventListener('beforeprint', function () {
+    nyomtatasElott = [];
+    document.querySelectorAll('details').forEach(function (szakasz) {
+      nyomtatasElott.push([szakasz, szakasz.open]);
+      szakasz.open = true;
+    });
+  });
+  window.addEventListener('afterprint', function () {
+    if (!nyomtatasElott) return;
+    nyomtatasElott.forEach(function (par) { par[0].open = par[1]; });
+    nyomtatasElott = null;
   });
 
   E('nyomtat').addEventListener('click', function () { window.print(); });

@@ -41,6 +41,12 @@ Kezelt adóalap-kedvezmények, a törvényi érvényesítési sorrendben:
 5. családi kedvezmény — a fel nem használt része **családi járulékkedvezményként** a
    társadalombiztosítási járulékból, annak erejéig
 
+Alapesetben csak az irányválasztó és a két összegmező látszik; a kedvezmények, a családi
+kedvezmény és az éves összesítő **összecsukható szakaszokban** van. Minden becsukott szakasz
+fejléce kiírja az aktuális beállítást („25 év alattiak, személyi", „2 kedvezményezett
+eltartott, megosztva", „Nincs"), hogy a helyspórolás ne járjon információvesztéssel.
+Nyomtatáskor mind kinyílik, majd visszazáródik.
+
 ### 2026-os értékek
 
 | Tétel | Érték |
@@ -149,7 +155,7 @@ kell lennie. Az átalányadó-kalkulátorhoz:
 ```
 
 A bérkalkulátorhoz ugyanez, `ber-kalkulator` azonosítóval, `ber-kalkulator/?embed=1` címmel és
-`height="2200"` tartalékkal.
+`height="1200"` tartalékkal.
 
 ### Miért kell a `<style>`
 
@@ -173,13 +179,12 @@ flexbox lesz, a szabály egyszerűen hatástalan — nem tud elrontani semmit.
 ### Meddig szélesedik
 
 A bejegyzés-sablon tartalomsávja **832 px** széles (`.e-con-inner { max-width: 832px }`), és a
-konténer az ennél szélesebb iframe-et levágja — negatív margós „kitörés" sem segít. Ezért az
-átalányadó-kalkulátor **780 px fölött** vált kétoszlopos elrendezésre, nem 900 fölött: hogy a
+konténer az ennél szélesebb iframe-et levágja — negatív margós „kitörés" sem segít. Ezért
+**mindkét kalkulátor 780 px fölött** vált kétoszlopos elrendezésre, nem 900 fölött: hogy a
 832 px-es sávban is kettő legyen. A 780–1023 px közötti sávban szűkebb belső margóval és egy
-fokkal kisebb betűvel rajzolódik, különben a hosszú tételnevek fele két sorba törne.
+fokkal kisebb betűvel rajzolódnak, különben a hosszú tételnevek fele két sorba törne.
 
 Ha a sáv valaha szélesebb lesz, ez magától rendbe jön — a szűkítés csak 1023 px-ig él.
-(A bérkalkulátor töréspontja egyelőre maradt 900 px.)
 
 ### A script nem elhagyható
 

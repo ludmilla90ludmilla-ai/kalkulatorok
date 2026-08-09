@@ -67,9 +67,8 @@ Három dolog, amin a beágyazás elhasalt már:
   és a `width:100%` is ehhez igazodik. Ha a bejegyzésben az iframe mellett van szöveg is, a
   hiba elrejtőzik; ha nincs, 300 px-es lesz a kalkulátor. `min-width`-tel **ne** próbáld: az
   erősebb a konténer `max-width`-jénél, és túllógatja a lapot.
-- **A tartalomsáv 832 px**, és a konténer az ennél szélesebbet levágja. Ezért az
-  átalányadó-kalkulátor töréspontja 780 px, nem 900 — hogy ebben a sávban is kétoszlopos
-  legyen. (A bérkalkulátoré egyelőre maradt 900 px.)
+- **A tartalomsáv 832 px**, és a konténer az ennél szélesebbet levágja. Ezért mindkét
+  kalkulátor töréspontja 780 px, nem 900 — hogy ebben a sávban is kétoszlopos legyen.
 - **A fogadó scriptben az `id`-t is át kell írni**, ha a snippet a másik kalkulátorról lett
   másolva. Különben a `getElementById` `null`, a kezelő elszáll, és az iframe a tartalék
   magasságon ragad. Ellenőrzés: `document.getElementById('<id>').style.height` — ha üres
@@ -77,7 +76,7 @@ Három dolog, amin a beágyazás elhasalt már:
 
 ## Összecsukható szakaszok
 
-Az átalányadó-kalkulátor űrlapja `<details class="kalk-szakasz">` szakaszokból áll. Két
+Mindkét kalkulátor űrlapja `<details class="kalk-szakasz">` szakaszokból áll. Két
 szabály tartozik hozzájuk, és mindkettő fontos:
 
 - **A `<summary>` mindig kiírja az aktuális beállítást** (`.kalk-szakasz__allapot`, a
