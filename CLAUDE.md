@@ -75,6 +75,25 @@ Három dolog, amin a beágyazás elhasalt már:
   magasságon ragad. Ellenőrzés: `document.getElementById('<id>').style.height` — ha üres
   marad, nem fut a script.
 
+## Összecsukható szakaszok
+
+Az átalányadó-kalkulátor űrlapja `<details class="kalk-szakasz">` szakaszokból áll. Két
+szabály tartozik hozzájuk, és mindkettő fontos:
+
+- **A `<summary>` mindig kiírja az aktuális beállítást** (`.kalk-szakasz__allapot`, a
+  `szakaszAllapotok()` tölti fel a `frissit()`-ből). Becsukott szakasz helyet spórolhat, de
+  információt nem rejthet el — a vállalkozás jellege például nullázhatja a szochót és a
+  járulékot.
+- **Nyomtatáskor mind kinyílik**, `beforeprint`-re, és `afterprint`-re visszaáll. CSS-sel ezt
+  nem lehet megoldani, mert a becsukott `<details>` tartalmát a böngésző belső stílusa rejti.
+
+Két buktató, ami már megvolt:
+
+- A `toggle` esemény **aszinkron** — programozottan állított `open` után csak a következő
+  ciklusban fut le a kezelő. Teszteléskor várni kell rá.
+- A `<summary>` flex konténer, és a flex elemek alapértelmezett `min-width: auto`-ja miatt a
+  hosszú állapotszöveg nem tudna tördelődni: `min-width: 0` nélkül keskeny kijelzőn kilóg.
+
 ## Futtatás és ellenőrzés
 
 A gépen **nincs Node és nincs működő Python** (a `python.exe` a Store-os csonk), és nincs

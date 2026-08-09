@@ -76,9 +76,22 @@ ennél az adózási módnál a hónapok nem függetlenek egymástól:
   amit a korábbi negyedévek már lekötöttek, elosztjuk hárommal, és ez lesz a negyedév
   mindhárom hónapjának alapja — de legalább a minimumalap.
 
-Alapesetben egyetlen havi bevételt kell megadni (minden hónapra ugyanaz); a *„A havi bevételek
-eltérnek"* kapcsolóval mind a 12 hónap külön írható. Az eredménykártya éves összesítést mutat,
-alatta kinyitható a hónapról hónapra bontás.
+Alapesetben egyetlen havi bevételt kell megadni (minden hónapra ugyanaz), és ehhez jön a
+költséghányad — más nem is látszik. Minden további beállítás **összecsukható szakaszban** van:
+havi bevételek, biztosítási jogviszony, kedvezmények, családi kedvezmény. Az eredménykártya
+éves összesítést mutat, alatta kinyitható a hónapról hónapra bontás.
+
+**A becsukott szakasz fejléce mindig kiírja az aktuális beállítást** („Főállású · garantált
+bérminimum", „25 év alattiak, személyi", „Nincs"). Ez nem díszítés: a vállalkozás jellege
+nullázhatja a szochót és a járulékot, tehát ha ez láthatatlanul dőlne el, rossz számot kapna,
+aki nem nyitja ki a szakaszt.
+
+A *Havi bevételek* szakasznál maga a kinyitás a kapcsoló: csukva minden hónapra a közös
+összeggel számolunk, nyitva a 12 mező értékével. Nyitáskor a mezők a közös összegről indulnak,
+így a kinyitás önmagában sosem változtatja meg az eredményt.
+
+Nyomtatáskor minden szakasz automatikusan kinyílik, majd visszazáródik — különben a
+beállítások lemaradnának a papírról.
 
 Az adóalap-kedvezmények ugyanazok és ugyanabban a sorrendben, mint a bérkalkulátorban — a
 kereteket és a családi kedvezmény sávjait a motor közvetlenül az
@@ -124,7 +137,7 @@ kell lennie. Az átalányadó-kalkulátorhoz:
 <iframe id="atalanyado-kalkulator"
         src="https://ludmilla90ludmilla-ai.github.io/kalkulatorok/atalanyado-kalkulator/?embed=1"
         title="Átalányadó-kalkulátor 2026"
-        style="display:block;border:0;width:100%;" height="2700"></iframe>
+        style="display:block;border:0;width:100%;" height="1600"></iframe>
 
 <script>
   window.addEventListener('message', function (esemeny) {
