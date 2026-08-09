@@ -117,7 +117,8 @@ jelenik meg — így az Elementor HTML-widgetjébe illesztve a honlap saját ker
 <iframe id="ber-kalkulator"
         src="https://ludmilla90ludmilla-ai.github.io/kalkulatorok/ber-kalkulator/?embed=1"
         title="Bér- és jövedelemkalkulátor 2026"
-        style="width:100%;border:0;display:block;" height="1300"></iframe>
+        style="display:block;border:0;width:100%;min-width:min(100vw - 40px, 1240px);"
+        height="1300"></iframe>
 <script>
   window.addEventListener('message', function (esemeny) {
     if (esemeny.data && esemeny.data.tipus === 'kalkulator-magassag') {
@@ -133,11 +134,38 @@ Az átalányadó-kalkulátorhoz ugyanez, más `id`-vel és `src`-vel:
 <iframe id="atalanyado-kalkulator"
         src="https://ludmilla90ludmilla-ai.github.io/kalkulatorok/atalanyado-kalkulator/?embed=1"
         title="Átalányadó-kalkulátor 2026"
-        style="width:100%;border:0;display:block;" height="1600"></iframe>
+        style="display:block;border:0;width:100%;min-width:min(100vw - 40px, 1240px);"
+        height="1600"></iframe>
 ```
 
 A fogadó script közös: az üzenet `tipus`-a mindegyik kalkulátornál `kalkulator-magassag`, csak
 a `getElementById`-t kell a megfelelő `id`-re állítani (vagy egyszerre több iframe-et kezelni).
+
+### A `min-width` nem díszítés
+
+Az Elementor konténerei flexboxok, és a bejegyzés-sablonban `align-items: center` van rajtuk.
+Flexboxban ez azt jelenti, hogy az elemek **nem nyúlnak ki** a teljes szélességre, hanem a
+tartalmukhoz zsugorodnak. Egy `<iframe>` belső (intrinsic) szélessége a HTML-szabvány szerint
+**300 px**, és a `width:100%` sem segít, mert a 100% is ehhez a 300 px-hez igazodik — az
+eredmény egy 300 px-es, használhatatlanul keskeny kalkulátor.
+
+Ez csak akkor jön elő, ha a bejegyzés tartalma **kizárólag** az iframe. Ha van fölötte egy
+bekezdés szöveg, akkor annak a sorhossza feszíti szét az oszlopot, és a hiba elrejtőzik — a
+bérkalkulátor bejegyzése sokáig pont ezért működött.
+
+A `min-width: min(100vw - 40px, 1240px)` mindkét esetet lefedi: asztali gépen kinyitja az
+oszlopot a sáv teljes szélességére, mobilon pedig a képernyőhöz igazodik, és nem okoz
+vízszintes görgetést.
+
+### Meddig szélesedik
+
+A bejegyzés-sablon tartalomsávja **832 px** széles (`.e-con-inner { max-width: 832px }`), és a
+konténer az ennél szélesebb iframe-et is levágja — negatív margós „kitörés" sem segít. Ezért a
+kalkulátorok **780 px fölött** váltanak kétoszlopos elrendezésre, nem 900 fölött: hogy a 832
+px-es sávban is kettő legyen. A 780–1023 px közötti sávban szűkebb belső margóval és egy
+fokkal kisebb betűvel rajzolódnak, különben a hosszú tételnevek fele két sorba törne.
+
+Ha a sáv valaha szélesebb lesz, ez magától rendbe jön — a szűkítés csak 1023 px-ig él.
 
 A scriptet érdemes bent hagyni. A kalkulátor magától küldi a magasságát, valahányszor a
 tartalom mérete változik, így az iframe pontosan akkora lesz, amekkora kell. Nélküle a fix

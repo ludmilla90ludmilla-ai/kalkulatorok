@@ -59,6 +59,16 @@ a snippet a README-ben van.
 **A magasságot a `body`-ból kell mérni, nem a `documentElement`-ből** — utóbbi sosem kisebb az
 iframe belmagasságánál, ezért egy túl nagy érték beragadna.
 
+Két dolog, amin a beágyazás elhasalt már:
+
+- **Az iframe-nek `min-width` kell**, nem elég a `width:100%`. Az Elementor konténerein
+  `align-items: center` van, ott a flex elemek nem nyúlnak ki, hanem a tartalmukhoz
+  zsugorodnak — egy `<iframe>` belső szélessége pedig a szabvány szerint 300 px. Ha a
+  bejegyzésben az iframe mellett van szöveg is, a hiba elrejtőzik; ha nincs, 300 px-es lesz
+  a kalkulátor. A snippet a README-ben már tartalmazza a javítást.
+- **A tartalomsáv 832 px**, és a konténer az ennél szélesebbet levágja. Ezért a kalkulátorok
+  töréspontja 780 px, nem 900 — hogy ebben a sávban is kétoszlopos legyen az elrendezés.
+
 ## Futtatás és ellenőrzés
 
 A gépen **nincs Node és nincs működő Python** (a `python.exe` a Store-os csonk), és nincs

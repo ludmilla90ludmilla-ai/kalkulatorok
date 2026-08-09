@@ -21,7 +21,10 @@
     align-items: start;
   }
 
-  @media (max-width: 899px) {
+  /* A töréspont azért 780px és nem 900, mert a honlap bejegyzéssávja 832px széles: ott is
+     kétoszlopos elrendezést akarunk. A 780–1023px sávban szűkebb margó és kisebb betű kell
+     hozzá — lásd lentebb. */
+  @media (max-width: 779px) {
     .kalk-munkaterulet { grid-template-columns: minmax(0, 1fr); gap: 30px; }
   }
 
@@ -61,7 +64,7 @@
     position: sticky;
     top: 90px;
   }
-  @media (max-width: 899px) { .kalk-eredmeny { position: static; padding: 28px 24px; } }
+  @media (max-width: 779px) { .kalk-eredmeny { position: static; padding: 28px 24px; } }
 
   .kalk-fooszeg__cimke {
     font-family: var(--vwp-font-accent);
@@ -120,6 +123,19 @@
   .kalk-muveletek .vwp-btn { padding: 12px 20px; }
 
   .kalk-jogi { font-size: 13px; line-height: 1.6; color: var(--vwp-text); max-width: 80ch; }
+
+  /* Szűk kétoszlopos sáv: a honlapba ágyazva ~376px jut egy oszlopra. Szűkebb belső margóval
+     és egy fokkal kisebb betűvel kevesebb tételnév törik két sorba. A blokknak a fenti
+     alapértékek UTÁN kell állnia, különben azok írnák felül (a médialekérdezés nem növeli
+     a specifikusságot). */
+  @media (min-width: 780px) and (max-width: 1023px) {
+    .kalk-munkaterulet { gap: 26px; }
+    .kalk-eredmeny { padding: 28px 22px; }
+    .kalk-fooszeg__cimke { font-size: 16px; }
+    .kalk-fooszeg__ertek { font-size: 36px; }
+    .kalk-tetelek h3 { font-size: 12px; }
+    .kalk-sor { font-size: 14px; }
+  }
 
   /* ---------- Havi bontás ---------- */
 
