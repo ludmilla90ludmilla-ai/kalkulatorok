@@ -150,6 +150,20 @@ feltöltése a médiatárba.
 
 **A commit-üzenetek magyarul vannak**, jelen idejű, tárgyilagos megfogalmazással.
 
+### Hol fut élesben
+
+| Mi | Cím |
+|---|---|
+| Gyűjtőoldal | https://ludmilla90ludmilla-ai.github.io/kalkulatorok/ |
+| Bérkalkulátor | `.../kalkulatorok/ber-kalkulator/` · bejegyzés: https://viktoriawp.eu/ber-es-jovedelem-kalkulator-2026/ |
+| Átalányadó | `.../kalkulatorok/atalanyado-kalkulator/` · bejegyzés: https://viktoriawp.eu/atalanyado-kalkulator-2026/ |
+| Ikontár | `.../kalkulatorok/ikonok/` |
+
+Mindkét bejegyzés publikálva van, kiemelt képpel, a beágyazás ellenőrizve: a bejegyzéssávban
+832 px szélesek, a magasságot a script állítja (bér ~1100 px, átalányadó ~1516 px csukott
+szakaszokkal). A Pages általában egy percen belül frissül push után; érdemes megvárni és
+visszaellenőrizni, mert a böngésző a régi CSS-t sokáig cache-eli.
+
 ## A honlapról, amit itt tanultunk
 
 - A **Smush lazy loadja** (lazysizes) `src="about:blank"` + `data-src` + `data-load-mode="0"`
