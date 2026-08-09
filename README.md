@@ -113,38 +113,35 @@ a szünetelést, a táppénzes és egyéb kieső időszakokat, a nem átalányad
 A kalkulátor `?embed=1` paraméterrel fejléc, hero és lábléc nélkül, átlátszó háttérrel
 jelenik meg — így az Elementor HTML-widgetjébe illesztve a honlap saját kerete marad a keret.
 
+**Mindhárom rész kell**, és a bejegyzésenként eltérő `id`-nek **mind a három helyen** ugyanannak
+kell lennie. Az átalányadó-kalkulátorhoz:
+
 ```html
-<iframe id="ber-kalkulator"
-        src="https://ludmilla90ludmilla-ai.github.io/kalkulatorok/ber-kalkulator/?embed=1"
-        title="Bér- és jövedelemkalkulátor 2026"
-        style="display:block;border:0;width:100%;min-width:min(100vw - 40px, 1240px);"
-        height="1300"></iframe>
+<style>
+  .elementor-widget:has(#atalanyado-kalkulator) { align-self: stretch; }
+</style>
+
+<iframe id="atalanyado-kalkulator"
+        src="https://ludmilla90ludmilla-ai.github.io/kalkulatorok/atalanyado-kalkulator/?embed=1"
+        title="Átalányadó-kalkulátor 2026"
+        style="display:block;border:0;width:100%;" height="2700"></iframe>
+
 <script>
   window.addEventListener('message', function (esemeny) {
     if (esemeny.data && esemeny.data.tipus === 'kalkulator-magassag') {
-      document.getElementById('ber-kalkulator').style.height = esemeny.data.magassag + 'px';
+      document.getElementById('atalanyado-kalkulator').style.height = esemeny.data.magassag + 'px';
     }
   });
 </script>
 ```
 
-Az átalányadó-kalkulátorhoz ugyanez, más `id`-vel és `src`-vel:
+A bérkalkulátorhoz ugyanez, `ber-kalkulator` azonosítóval, `ber-kalkulator/?embed=1` címmel és
+`height="2200"` tartalékkal.
 
-```html
-<iframe id="atalanyado-kalkulator"
-        src="https://ludmilla90ludmilla-ai.github.io/kalkulatorok/atalanyado-kalkulator/?embed=1"
-        title="Átalányadó-kalkulátor 2026"
-        style="display:block;border:0;width:100%;min-width:min(100vw - 40px, 1240px);"
-        height="1600"></iframe>
-```
-
-A fogadó script közös: az üzenet `tipus`-a mindegyik kalkulátornál `kalkulator-magassag`, csak
-a `getElementById`-t kell a megfelelő `id`-re állítani (vagy egyszerre több iframe-et kezelni).
-
-### A `min-width` nem díszítés
+### Miért kell a `<style>`
 
 Az Elementor konténerei flexboxok, és a bejegyzés-sablonban `align-items: center` van rajtuk.
-Flexboxban ez azt jelenti, hogy az elemek **nem nyúlnak ki** a teljes szélességre, hanem a
+Flexboxban ez azt jelenti, hogy az elemek **nem nyúlnak ki** a sáv szélességére, hanem a
 tartalmukhoz zsugorodnak. Egy `<iframe>` belső (intrinsic) szélessége a HTML-szabvány szerint
 **300 px**, és a `width:100%` sem segít, mert a 100% is ehhez a 300 px-hez igazodik — az
 eredmény egy 300 px-es, használhatatlanul keskeny kalkulátor.
@@ -153,24 +150,40 @@ Ez csak akkor jön elő, ha a bejegyzés tartalma **kizárólag** az iframe. Ha 
 bekezdés szöveg, akkor annak a sorhossza feszíti szét az oszlopot, és a hiba elrejtőzik — a
 bérkalkulátor bejegyzése sokáig pont ezért működött.
 
-A `min-width: min(100vw - 40px, 1240px)` mindkét esetet lefedi: asztali gépen kinyitja az
-oszlopot a sáv teljes szélességére, mobilon pedig a képernyőhöz igazodik, és nem okoz
-vízszintes görgetést.
+Az `align-self: stretch` a widgetre a hiba gyökerét szünteti meg: felülírja a konténer
+`align-items: center`-jét, így az elem a sáv teljes szélességét felveszi. Ha a téma valaha nem
+flexbox lesz, a szabály egyszerűen hatástalan — nem tud elrontani semmit.
+
+**Amit ne csinálj:** `min-width`-tel is ki lehetne nyitni, de az *erősebb* a konténer
+`max-width`-jénél, ezért egy túl nagyra állított érték vízszintesen túllógatja az egész lapot.
 
 ### Meddig szélesedik
 
 A bejegyzés-sablon tartalomsávja **832 px** széles (`.e-con-inner { max-width: 832px }`), és a
-konténer az ennél szélesebb iframe-et is levágja — negatív margós „kitörés" sem segít. Ezért a
-kalkulátorok **780 px fölött** váltanak kétoszlopos elrendezésre, nem 900 fölött: hogy a 832
-px-es sávban is kettő legyen. A 780–1023 px közötti sávban szűkebb belső margóval és egy
-fokkal kisebb betűvel rajzolódnak, különben a hosszú tételnevek fele két sorba törne.
+konténer az ennél szélesebb iframe-et levágja — negatív margós „kitörés" sem segít. Ezért az
+átalányadó-kalkulátor **780 px fölött** vált kétoszlopos elrendezésre, nem 900 fölött: hogy a
+832 px-es sávban is kettő legyen. A 780–1023 px közötti sávban szűkebb belső margóval és egy
+fokkal kisebb betűvel rajzolódik, különben a hosszú tételnevek fele két sorba törne.
 
 Ha a sáv valaha szélesebb lesz, ez magától rendbe jön — a szűkítés csak 1023 px-ig él.
+(A bérkalkulátor töréspontja egyelőre maradt 900 px.)
 
-A scriptet érdemes bent hagyni. A kalkulátor magától küldi a magasságát, valahányszor a
-tartalom mérete változik, így az iframe pontosan akkora lesz, amekkora kell. Nélküle a fix
-`height` marad érvényben — az asztali, kétoszlopos elrendezéshez ~1300 px elég, de mobilon
-egy oszlopba rendeződik és ~2850 px kell, különben elvágja az alját.
+### A script nem elhagyható
+
+A kalkulátor magától küldi a magasságát, valahányszor a tartalom mérete változik, így az
+iframe pontosan akkora lesz, amekkora kell. A `height` attribútum csak tartalék az első
+pillanatra, illetve arra az esetre, ha a script nem fut le.
+
+**A leggyakoribb hiba**, hogy a snippetet a másik kalkulátorról másolják, és a scriptben
+bennmarad a régi `id`. Ilyenkor a `getElementById` `null`-t ad, a kezelő elszáll, és az iframe
+örökre a tartalék magasságon marad — a kalkulátor alját pedig levágja. Ellenőrizni így lehet
+a böngésző konzoljában:
+
+```js
+document.getElementById('atalanyado-kalkulator').style.height
+```
+
+Ha ez üres marad néhány másodperc után is, akkor a script nem talál rá az iframe-re.
 
 **Lazy load – hibakereséshez:** a viktoriawp.eu-n a Smush lazy loadja átírja az `iframe`-et
 `src="about:blank"` + `data-src` + `data-load-mode="0"` alakúra, és `0` módban nem az `src`-t

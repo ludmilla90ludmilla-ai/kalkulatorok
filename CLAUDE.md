@@ -59,15 +59,21 @@ a snippet a README-ben van.
 **A magasságot a `body`-ból kell mérni, nem a `documentElement`-ből** — utóbbi sosem kisebb az
 iframe belmagasságánál, ezért egy túl nagy érték beragadna.
 
-Két dolog, amin a beágyazás elhasalt már:
+Három dolog, amin a beágyazás elhasalt már:
 
-- **Az iframe-nek `min-width` kell**, nem elég a `width:100%`. Az Elementor konténerein
-  `align-items: center` van, ott a flex elemek nem nyúlnak ki, hanem a tartalmukhoz
-  zsugorodnak — egy `<iframe>` belső szélessége pedig a szabvány szerint 300 px. Ha a
-  bejegyzésben az iframe mellett van szöveg is, a hiba elrejtőzik; ha nincs, 300 px-es lesz
-  a kalkulátor. A snippet a README-ben már tartalmazza a javítást.
-- **A tartalomsáv 832 px**, és a konténer az ennél szélesebbet levágja. Ezért a kalkulátorok
-  töréspontja 780 px, nem 900 — hogy ebben a sávban is kétoszlopos legyen az elrendezés.
+- **Kell egy `<style>` a snippetbe**, `align-self: stretch`-csel a widgetre. Az Elementor
+  konténerein `align-items: center` van, ott a flex elemek nem nyúlnak ki, hanem a
+  tartalmukhoz zsugorodnak — egy `<iframe>` belső szélessége pedig a szabvány szerint 300 px,
+  és a `width:100%` is ehhez igazodik. Ha a bejegyzésben az iframe mellett van szöveg is, a
+  hiba elrejtőzik; ha nincs, 300 px-es lesz a kalkulátor. `min-width`-tel **ne** próbáld: az
+  erősebb a konténer `max-width`-jénél, és túllógatja a lapot.
+- **A tartalomsáv 832 px**, és a konténer az ennél szélesebbet levágja. Ezért az
+  átalányadó-kalkulátor töréspontja 780 px, nem 900 — hogy ebben a sávban is kétoszlopos
+  legyen. (A bérkalkulátoré egyelőre maradt 900 px.)
+- **A fogadó scriptben az `id`-t is át kell írni**, ha a snippet a másik kalkulátorról lett
+  másolva. Különben a `getElementById` `null`, a kezelő elszáll, és az iframe a tartalék
+  magasságon ragad. Ellenőrzés: `document.getElementById('<id>').style.height` — ha üres
+  marad, nem fut a script.
 
 ## Futtatás és ellenőrzés
 
