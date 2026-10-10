@@ -100,9 +100,10 @@ Két buktató, ami már megvolt:
 
 Ugyanez a fajta buktató az eredménykártyán: a **`.kalk-sor { display: flex }` erősebb a böngésző
 `[hidden]`-szabályánál**, ezért a `sor.hidden = true` önmagában nem rejt el semmit — kell mellé a
-`.kalk-sor[hidden] { display: none; }`. A KATA-kalkulátorban megvan; a bér- és az
-átalányadó-kalkulátorban (2026-10-10-én) még nincs, ott a „0 Ft"-os sorok látszanak. JS-ből a
-`sor.hidden` ilyenkor is `true`-t ad — a `getComputedStyle(sor).display`-t kell nézni.
+`.kalk-sor[hidden] { display: none; }`. Mindhárom kalkulátorban megvan (a bérben és az
+átalányadóban 2026-10-10-ig hiányzott, addig ott a „0 Ft"-os sorok is látszottak). Új
+kalkulátornál ne maradjon ki. JS-ből a `sor.hidden` a hiba idején is `true`-t ad — ellenőrzéskor
+a `getComputedStyle(sor).display`-t kell nézni.
 
 ## Futtatás és ellenőrzés
 

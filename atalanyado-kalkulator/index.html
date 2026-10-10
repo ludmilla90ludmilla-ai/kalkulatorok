@@ -149,6 +149,9 @@
     padding: 5px 0;
     font-size: 15px;
   }
+  /* A `display: flex` erősebb a böngésző `[hidden]`-szabályánál, ezért a rejtett sort külön
+     el kell tüntetni — különben a „0 Ft"-os sorok is látszanának. */
+  .kalk-sor[hidden] { display: none; }
   .kalk-sor span:last-child { font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 600; color: var(--vwp-ink); }
   .kalk-sor--kiemelt { font-weight: 700; }
   .kalk-sor--kiemelt span:first-child { color: var(--vwp-ink); }
