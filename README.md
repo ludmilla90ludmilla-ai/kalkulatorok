@@ -24,6 +24,7 @@ adatok nem hagyják el a gépet.
 | [`ikonok/index.html`](ikonok/index.html) | Ikontár: a bejegyzések kiemelt képeinek előnézete és letöltése |
 | [`ikonok/LEIRAT.md`](ikonok/LEIRAT.md) | Az ikontár részletes leirata: szabványok, rács, buktatók |
 | [`assets/ikonok/`](assets/ikonok/) | Az ikonok SVG-ben, mellettük a kész PNG-k |
+| [`bejegyzesek/`](bejegyzesek/) | A kalkulátorokat bemutató blogbejegyzések Gutenberg-kódja, beillesztésre készen (UTF-8 BOM-mal, Jegyzettömbbel megnyitva kell másolni) |
 
 ## Bér- és jövedelemkalkulátor 2026
 
