@@ -122,9 +122,28 @@ egyezniük kell.
 középső **1202 px-et** mutatja (a széleit levágja). A szélesebb ikon és a hosszabb felirat
 együtt kilógott ebből, és az ikon nagyobbnak is látszott a másiknál. Lásd a következő pontot.
 
-**Foglalt jelek:** „Ft" a bérkalkulátoré, „%" az átalányadóé. Új ikonhoz olyan jelet válassz,
-ami még nincs használatban — az áfakalkulátornak például a számla vagy blokk formája ad
-elegendő karaktert, nem kell hozzá a „%".
+### A harmadik ikon: `kata-kalkulator.svg`
+
+Bélyeg, mert a KATA lényege az előre ismert, fix havi tétel. A naptár már foglalt volt (az
+átalányadóé), ezért nem csak a jel, a tárgy is új. A rácsa:
+
+| Elem | Koordináták | Vonal |
+|---|---|---|
+| A test, fogazott széllel | `x=128…384`, `y=64…448`; a fogazás 64 px-enként egy befelé forduló, 16-os sugarú félkör, a sarkoktól is 64 px-re (oldalanként 3, illetve 5) | kontúr, `stroke-width: 18`, kerek illesztés |
+| A képmező | `x=168 y=104 w=176 h=168 rx=14` | tömör, benne kimaszkolva a „K" |
+| A „K" | szár `x=214…238`, `y=140…236`; a két ág egy-egy paralelogramma | kivágás |
+| Felirat-sorok | `x=168…344`, `y=316/350/384` (az utolsó rövidebb) | kontúr, `stroke-width: 10` |
+
+Kiterjedése `x: 119…393`, `y: 55…457` — ugyanaz a lábnyom, mint a másik kettőé. A sziluettet a
+fogazott szél különbözteti meg; kártyaméretben (~62 px) ez hullámos szélként még látszik.
+
+**A képmező először nagyobb volt** (`h=220`), és kicsiben az ikon „nehezebbnek” tűnt a másik
+kettőnél, mert náluk a tömör elem 80–88 px magas. A 168 px-es mezővel a három egyforma súlyú.
+
+**Foglalt jelek:** „Ft" a bérkalkulátoré, „%" az átalányadóé, „K" a KATA-é. **Foglalt
+sziluettek:** számológép, naptár, bélyeg. Új ikonhoz olyan tárgyat és jelet válassz, ami még
+nincs használatban — az áfakalkulátornak például a számla vagy blokk formája ad elegendő
+karaktert, nem kell hozzá a „%".
 
 ### A név hossza számít
 
@@ -140,6 +159,7 @@ tömb `nev` mezőjébe ezért rövid címke való, nem a kalkulátor teljes neve
 |---|---|---|
 | „Bérkalkulátor" | 939 px | igen |
 | „Átalányadó" | 815 px | igen |
+| „KATA" | 557 px | igen |
 | „Átalányadó-kalkulátor" | 1361 px | **nem**, mindkét szélén levágódik |
 
 Nagyjából **50 px karakterenként** a 104 px-es Playfairrel, plusz ~300 px az ikonra és a

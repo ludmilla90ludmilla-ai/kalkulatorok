@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="KATA">
+  <title>KATA</title>
+
+  <!-- Bélyeg, mert a KATA lényege az előre ismert, fix havi tétel. A tömör képmezőből a „K"
+       kivágva. A naptár (átalányadó) és a számológép (bér) után ez a harmadik sziluett: a
+       fogazott szél kicsiben is megkülönbözteti.
+
+       A test pontosan akkora, mint a másik kettőé (x: 128…384, y: 64…448, a vonallal együtt
+       119…393 és 55…457), hogy a bejegyzéslistában egyformának lássanak. A fogazás 64 px-enként
+       egy 16-os sugarú, befelé forduló félkör — a sarkoktól is 64 px-re, így a négy oldal ritmusa
+       egyforma. A betű mértani forma, nem szöveg: az SVG képként rajzolva nem tud webfontot
+       betölteni. -->
+  <defs>
+    <mask id="k-kivagas">
+      <rect x="168" y="104" width="176" height="168" rx="14" fill="#fff"/>
+      <!-- K: szár, felső és alsó szár egy-egy paralelogramma -->
+      <rect x="214" y="140" width="24" height="96" fill="#000"/>
+      <polygon points="238,172 269,140 296,140 238,200" fill="#000"/>
+      <polygon points="252,180 298,236 271,236 234,194" fill="#000"/>
+    </mask>
+  </defs>
+
+  <!-- A bélyeg fogazott széle -->
+  <path fill="none" stroke="#02023B" stroke-width="18" stroke-linejoin="round"
+        d="M128 64
+           H176 A16 16 0 0 0 208 64
+           H240 A16 16 0 0 0 272 64
+           H304 A16 16 0 0 0 336 64
+           H384
+           V112 A16 16 0 0 0 384 144
+           V176 A16 16 0 0 0 384 208
+           V240 A16 16 0 0 0 384 272
+           V304 A16 16 0 0 0 384 336
+           V368 A16 16 0 0 0 384 400
+           V448
+           H336 A16 16 0 0 0 304 448
+           H272 A16 16 0 0 0 240 448
+           H208 A16 16 0 0 0 176 448
+           H128
+           V400 A16 16 0 0 0 128 368
+           V336 A16 16 0 0 0 128 304
+           V272 A16 16 0 0 0 128 240
+           V208 A16 16 0 0 0 128 176
+           V144 A16 16 0 0 0 128 112
+           Z"/>
+
+  <!-- A képmező: az egyetlen tömör felület. Nagyjából akkora, mint a másik két ikon tömör
+       eleme, hogy kicsiben egyik se legyen „nehezebb". -->
+  <rect x="168" y="104" width="176" height="168" rx="14" fill="#02023B" mask="url(#k-kivagas)"/>
+
+  <!-- A bélyeg felirata -->
+  <g fill="none" stroke="#02023B" stroke-width="10" stroke-linecap="round">
+    <path d="M168 316h176"/>
+    <path d="M168 350h176"/>
+    <path d="M168 384h108"/>
+  </g>
+</svg>
