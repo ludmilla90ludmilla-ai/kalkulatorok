@@ -23,9 +23,9 @@ arról szól, **hogyan kell itt dolgozni**; hogy melyik kalkulátor mit tud, az 
 
 | Réteg | Fájlok |
 |---|---|
-| Motorok | `assets/szja2026.js`, `assets/atalanyado2026.js` |
-| Felületek | `ber-kalkulator/index.html`, `atalanyado-kalkulator/index.html` |
-| Tesztek | `teszt.html`, `teszt-atalanyado.html` |
+| Motorok | `assets/szja2026.js`, `assets/atalanyado2026.js`, `assets/kata2027.js` |
+| Felületek | `ber-kalkulator/index.html`, `atalanyado-kalkulator/index.html`, `kata-kalkulator/index.html` |
+| Tesztek | `teszt.html`, `teszt-atalanyado.html`, `teszt-kata.html` |
 | Gyűjtőoldal | `index.html` |
 | Ikontár | `ikonok/index.html`, `ikonok/LEIRAT.md`, `assets/ikonok/` |
 
@@ -33,6 +33,11 @@ arról szól, **hogyan kell itt dolgozni**; hogy melyik kalkulátor mit tud, az 
 (személyi, 25 év alattiak, első házasok), a családi kedvezmény sávjait és a
 `csaladiKedvezmenyOsszege()`-t, hogy a két kalkulátor ne tudjon kettéválni. Ezért minden lap,
 ami az átalányadó-motort használja, **előbb az `szja2026.js`-t tölti be**.
+
+A **`kata2027.js` önálló**, egyik másik motortól sem függ. Egy **törvénytervezetre** épül (a
+2026. október 6-i társadalmi egyeztetési szöveg): minden konstansa mellett ott a paragrafus, és a
+felület a beágyazott módban is látható sávban jelzi, hogy tervezet. Ha a törvényt elfogadják,
+ezeket az elfogadott szöveggel kell összevetni — a README KATA-szakasza leírja, mit.
 
 Az évfüggő számok a motorok **tetején**, egy blokkban laknak, kommentelt eredettel. A
 származtatott értékek képlettel készülnek (`SZEMELYI_KEDVEZMENY = Math.round(MINIMALBER/300)*100`),
@@ -93,6 +98,12 @@ Két buktató, ami már megvolt:
 - A `<summary>` flex konténer, és a flex elemek alapértelmezett `min-width: auto`-ja miatt a
   hosszú állapotszöveg nem tudna tördelődni: `min-width: 0` nélkül keskeny kijelzőn kilóg.
 
+Ugyanez a fajta buktató az eredménykártyán: a **`.kalk-sor { display: flex }` erősebb a böngésző
+`[hidden]`-szabályánál**, ezért a `sor.hidden = true` önmagában nem rejt el semmit — kell mellé a
+`.kalk-sor[hidden] { display: none; }`. A KATA-kalkulátorban megvan; a bér- és az
+átalányadó-kalkulátorban (2026-10-10-én) még nincs, ott a „0 Ft"-os sorok látszanak. JS-ből a
+`sor.hidden` ilyenkor is `true`-t ad — a `getComputedStyle(sor).display`-t kell nézni.
+
 ## Futtatás és ellenőrzés
 
 A gépen **nincs Node és nincs működő Python** (a `python.exe` a Store-os csonk), és nincs
@@ -108,7 +119,7 @@ rasterizáló sem. Ami van:
   `.claude/launch.json` kell a **munkakönyvtárban** (nem ebben a repóban), `url`-lel megadva,
   ha a kiszolgáló már fut.
 
-**Motorváltoztatás után mindkét tesztlapot futtasd** — a böngészőfül címében `✓` vagy `✕`
+**Motorváltoztatás után mindhárom tesztlapot futtasd** — a böngészőfül címében `✓` vagy `✕`
 jelzi az eredményt, a lap tetején pedig a darabszám.
 
 ## A Novitax mint referencia

@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KATA-motor ellenőrzése – Kalkulátorok</title>
+<style>
+  body { font: 15px/1.6 "Segoe UI", system-ui, sans-serif; color: #011111; margin: 40px auto; max-width: 900px; padding: 0 20px; }
+  h1 { font-size: 26px; margin-bottom: 4px; }
+  p.alcim { color: #62636A; margin-top: 0; }
+  #osszegzes { padding: 14px 18px; border-radius: 6px; font-weight: 700; margin: 24px 0; }
+  .rendben { background: #E7F6EC; color: #10633A; }
+  .hibas   { background: #FBEAEA; color: #8C1C1C; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid #DBDBDF; vertical-align: top; }
+  th { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: #62636A; }
+  td.allapot { width: 34px; font-weight: 700; }
+  tr.ok td.allapot { color: #10633A; }
+  tr.bukott td.allapot { color: #8C1C1C; }
+  tr.bukott { background: #FDF4F4; }
+  td.szam { font-variant-numeric: tabular-nums; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<h1>KATA-motor ellenőrzése</h1>
+<p class="alcim">
+  Az <code>assets/kata2027.js</code> kézzel kiszámolt eseteken, a 2026. október 6-i törvénytervezet
+  szabályai szerint. Az oldal megnyitása futtatja az ellenőrzést.
+</p>
+
+<div id="osszegzes">Futtatás…</div>
+
+<table>
+  <thead>
+    <tr><th class="allapot"></th><th>Eset</th><th>Vizsgált érték</th><th>Várt</th><th>Kapott</th></tr>
+  </thead>
+  <tbody id="sorok"></tbody>
+</table>
+
+<script src="assets/kata2027.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var esetek = [];
+
+  /* Az eredmény megnevezett mezőit ellenőrzi. */
+  function eset(nev, be, vartak) {
+    var eredmeny = KATA2027.szamol(be);
+    Object.keys(vartak).forEach(function (mezo) {
+      esetek.push({ nev: nev, mezo: mezo, vart: vartak[mezo], kapott: eredmeny[mezo] });
+    });
+  }
+
+  function allit(nev, mezo, vart, kapott) {
+    esetek.push({ nev: nev, mezo: mezo, vart: vart, kapott: kapott });
+  }
+
+  var ures = {
+    jelleg: 'foallasu', katasHonapok: 12, mentesHonapok: 0,
+    maganBevetel: 0, kifizetoiBevetel: 0, legnagyobbMegrendelo: 0,
+    voltMunkaltato: false, koltsegek: 0, ertelmezes: 'ovatos'
+  };
+
+  function be(valtozok) {
+    var uj = {};
+    Object.keys(ures).forEach(function (k) { uj[k] = ures[k]; });
+    Object.keys(valtozok).forEach(function (k) { uj[k] = valtozok[k]; });
+    return uj;
+  }
+
+  /* ---- Konstansok (a tervezet szövegéből) ------------------------------- */
+
+  allit('Tételes adó, főfoglalkozású — 7. § (1) aa)', 'TETELES_ADO.foallasu', 100000, KATA2027.TETELES_ADO.foallasu);
+  allit('Tételes adó, nem főfoglalkozású — 7. § (1) ba)', 'TETELES_ADO.mellek', 50000, KATA2027.TETELES_ADO.mellek);
+  allit('Keretösszeg — 7. § (5)', 'KERETOSSZEG', 22000000, KATA2027.KERETOSSZEG);
+  allit('Különadó — 7. § (4)', 'KULONADO_KULCS', 0.40, KATA2027.KULONADO_KULCS);
+  allit('Kiegészítő adó — 8. § (1)', 'KIEGESZITO_KULCS', 0.15, KATA2027.KIEGESZITO_KULCS);
+  allit('Ellátási alap 2027 — 10. § (1) a)', 'ELLATASI_ALAP', 317000, KATA2027.ELLATASI_ALAP);
+
+  /* ---- Forrásbeli példák -----------------------------------------------
+     allampapirkalkulator.hu: „Végigszámoltam az új kata tervezetét…” — a táblázat esetei,
+     kézzel újraszámolva. A 28 milliós esetnél a cikk szövegközi összege (5,5 M) elírás:
+     1,2 + 2,1 + 2,4 = 5,7 M, ezt a cikk saját 20,4%-os kulcsa is megerősíti. */
+
+  eset('Grafikus: 14 M bevétel, ebből 10 M céges', be({
+    maganBevetel: 4000000, kifizetoiBevetel: 10000000
+  }), { tetelesAdo: 1200000, kiegeszitoAdo: 300000, kulonado: 0, kozterhek: 1500000 });
+
+  eset('Szoftver: 20 M, csak céges — pontosan 15%', be({
+    kifizetoiBevetel: 20000000
+  }), { tetelesAdo: 1200000, kiegeszitoAdo: 1800000, kulonado: 0, kozterhek: 3000000, hatekonyKulcs: 0.15 });
+
+  eset('Szoftver: 28 M, csak céges — kereten felül', be({
+    kifizetoiBevetel: 28000000
+  }), { keret: 22000000, tullepes: 6000000, kiegeszitoAlap: 22000000, kiegeszitoAdo: 2100000,
+        kulonado: 2400000, kozterhek: 5700000 });
+
+  eset('Fodrász: 9 M, csak magánszemélyektől', be({
+    maganBevetel: 9000000
+  }), { tetelesAdo: 1200000, kiegeszitoAdo: 0, kulonado: 0, kozterhek: 1200000 });
+
+  eset('Nem főfoglalkozású: 6 M, csak céges', be({
+    jelleg: 'mellek', kifizetoiBevetel: 6000000
+  }), { tetelesAdo: 600000, kiegeszitoAdo: 300000, kozterhek: 900000, ellatasiAlap: 0 });
+
+  /* ---- Küszöbök --------------------------------------------------------- */
+
+  eset('Főfoglalkozású: 8 M céges bevételig nincs kiegészítő adó', be({
+    kifizetoiBevetel: 8000000
+  }), { kifizetoiKuszob: 8000000, kiegeszitoAdo: 0 });
+
+  eset('Főfoglalkozású: 8 000 100 Ft-nál már 15 Ft', be({
+    kifizetoiBevetel: 8000100
+  }), { kiegeszitoAdo: 15 });
+
+  eset('Nem főfoglalkozású küszöb: 4 M', be({
+    jelleg: 'mellek', kifizetoiBevetel: 4000000
+  }), { kifizetoiKuszob: 4000000, kiegeszitoAdo: 0 });
+
+  /* ---- A 8. § (5) három olvasata ----------------------------------------
+     10 M magán + 20 M céges: keret 22 M, túllépés 8 M, különadó 3,2 M.
+     óvatos:  alap 20 M                → 3 000 000 − 1 200 000 = 1 800 000
+     arányos: alap 20 M × 22/30        → 2 200 000 − 1 200 000 = 1 000 000
+     kedvező: alap 20 M − 8 M = 12 M   → 1 800 000 − 1 200 000 =   600 000 */
+
+  var vegyes = { maganBevetel: 10000000, kifizetoiBevetel: 20000000 };
+
+  function vegyesen(ertelmezes) {
+    var b = be(vegyes);
+    b.ertelmezes = ertelmezes;
+    return b;
+  }
+
+  eset('Vegyes, kereten felül — óvatos', vegyesen('ovatos'),
+    { kulonado: 3200000, kiegeszitoAlap: 20000000, kiegeszitoAdo: 1800000, kozterhek: 6200000 });
+  eset('Vegyes, kereten felül — arányos', vegyesen('aranyos'),
+    { kiegeszitoAlap: 14666667, kiegeszitoAdo: 1000000, kozterhek: 5400000 });
+  eset('Vegyes, kereten felül — kedvező', vegyesen('kedvezo'),
+    { kiegeszitoAlap: 12000000, kiegeszitoAdo: 600000, kozterhek: 5000000 });
+
+  var harom = KATA2027.szamol(be(vegyes)).ertelmezesek;
+  allit('Mindhárom olvasat elérhető az eredményben', 'ertelmezesek',
+    '1800000/1000000/600000', harom.ovatos + '/' + harom.aranyos + '/' + harom.kedvezo);
+
+  var csakCeges = KATA2027.szamol(be({ kifizetoiBevetel: 28000000 })).ertelmezesek;
+  allit('Csak céges bevételnél a három olvasat egybeesik', 'ertelmezesek',
+    true, csakCeges.ovatos === csakCeges.aranyos && csakCeges.aranyos === csakCeges.kedvezo);
+
+  /* ---- Időarányosítás és mentes hónapok — 7. § (4), (8); 8. § (3) -------- */
+
+  eset('Fél év: 6 hónap, 4 M céges + 8 M magán', be({
+    katasHonapok: 6, kifizetoiBevetel: 4000000, maganBevetel: 8000000
+  }), { tetelesAdo: 600000, keret: 11000000, tullepes: 1000000, kulonado: 400000,
+        kiegeszitoAdo: 0, kozterhek: 1000000, kifizetoiKuszob: 4000000 });
+
+  eset('12 katás hónapból 2 mentes', be({
+    katasHonapok: 12, mentesHonapok: 2, kifizetoiBevetel: 8000000
+  }), { fizetosHonapok: 10, tetelesAdo: 1000000, keret: 18333333, kifizetoiKuszob: 6666667,
+        kiegeszitoAdo: 200000 });
+
+  eset('Minden hónap mentes: a keret nulla', be({
+    katasHonapok: 3, mentesHonapok: 3, maganBevetel: 1000000
+  }), { tetelesAdo: 0, keret: 0, kulonado: 400000 });
+
+  eset('Hiányzó hónapszám: egész év', be({ katasHonapok: undefined, kifizetoiBevetel: 1000000 }),
+    { katasHonapok: 12, tetelesAdo: 1200000 });
+
+  eset('Több mentes hónap, mint katás: a katás a felső korlát', be({ katasHonapok: 4, mentesHonapok: 9 }),
+    { mentesHonapok: 4, fizetosHonapok: 0 });
+
+  /* ---- Tájékoztató értékek ---------------------------------------------- */
+
+  eset('Ellátási alap és jövedelemigazolás', be({
+    maganBevetel: 4000000, kifizetoiBevetel: 10000000
+  }), { ellatasiAlap: 317000, igazoltJovedelem: 8400000 });
+
+  eset('Havi tartalék: (kiegészítő + különadó) / katás hónapok, felfelé kerekítve', be(vegyes),
+    { haviTartalek: 416667 });
+
+  eset('Költség csak az adózott jövedelmet érinti', be({
+    kifizetoiBevetel: 10000000, koltsegek: 2000000
+  }), { kozterhek: 1500000, adozottJovedelem: 6500000 });
+
+  eset('A legnagyobb megrendelő nem lehet több a céges bevételnél', be({
+    kifizetoiBevetel: 3000000, legnagyobbMegrendelo: 5000000
+  }), { legnagyobbMegrendelo: 3000000 });
+
+  /* ---- Figyelmeztetések ------------------------------------------------- */
+
+  function figyelmeztet(bemenet, tipus) {
+    return KATA2027.szamol(be(bemenet)).figyelmeztetesek.some(function (f) { return f.tipus === tipus; });
+  }
+
+  allit('Keret túllépése', 'keret', true, figyelmeztet({ kifizetoiBevetel: 28000000 }, 'keret'));
+  allit('Kereten belül nincs', 'keret', false, figyelmeztet({ kifizetoiBevetel: 22000000 }, 'keret'));
+  allit('50%-os megrendelő', 'megrendelo', true,
+    figyelmeztet({ maganBevetel: 4000000, kifizetoiBevetel: 10000000, legnagyobbMegrendelo: 7000000 }, 'megrendelo'));
+  allit('49%-os megrendelő még nem szünteti meg', 'megrendelo', false,
+    figyelmeztet({ maganBevetel: 4000000, kifizetoiBevetel: 10000000, legnagyobbMegrendelo: 6860000 }, 'megrendelo'));
+  allit('49%-osnál közeli figyelmeztetés', 'megrendeloKozel', true,
+    figyelmeztet({ maganBevetel: 4000000, kifizetoiBevetel: 10000000, legnagyobbMegrendelo: 6860000 }, 'megrendeloKozel'));
+  allit('Volt munkáltató', 'munkaltato', true, figyelmeztet({ voltMunkaltato: true }, 'munkaltato'));
+  allit('Nem főfoglalkozású nem biztosított', 'biztositas', true, figyelmeztet({ jelleg: 'mellek' }, 'biztositas'));
+  allit('Főfoglalkozásúnál nincs biztosítási figyelmeztetés', 'biztositas', false, figyelmeztet({}, 'biztositas'));
+  allit('Vegyes, kereten felül: az értelmezés számít', 'ertelmezes', true, figyelmeztet(vegyes, 'ertelmezes'));
+  allit('Csak céges, kereten felül: az értelmezés nem számít', 'ertelmezes', false,
+    figyelmeztet({ kifizetoiBevetel: 28000000 }, 'ertelmezes'));
+  allit('Minden hónap mentes, van bevétel', 'mentes', true,
+    figyelmeztet({ katasHonapok: 3, mentesHonapok: 3, maganBevetel: 1000000 }, 'mentes'));
+
+  /* ---- 200 véletlen év --------------------------------------------------- */
+
+  var hibak = { osszeg: 0, adozott: 0, negativ: 0, sorrend: 0, kulonado: 0 };
+  for (var i = 0; i < 200; i++) {
+    var katas = 1 + Math.floor(Math.random() * 12);
+    var minta = be({
+      jelleg: i % 3 === 0 ? 'mellek' : 'foallasu',
+      katasHonapok: katas,
+      mentesHonapok: Math.floor(Math.random() * (katas + 1)),
+      maganBevetel: Math.round(Math.random() * 20000000),
+      kifizetoiBevetel: Math.round(Math.random() * 30000000),
+      koltsegek: Math.round(Math.random() * 3000000),
+      ertelmezes: ['ovatos', 'aranyos', 'kedvezo'][i % 3]
+    });
+    var e = KATA2027.szamol(minta);
+    if (e.kozterhek !== e.tetelesAdo + e.kiegeszitoAdo + e.kulonado) hibak.osszeg++;
+    if (e.adozottJovedelem !== e.osszesBevetel - e.koltsegek - e.kozterhek) hibak.adozott++;
+    if (e.tetelesAdo < 0 || e.kiegeszitoAdo < 0 || e.kulonado < 0) hibak.negativ++;
+    var o = e.ertelmezesek;
+    if (!(o.ovatos >= o.aranyos && o.aranyos >= o.kedvezo)) hibak.sorrend++;
+    if (e.kulonado !== Math.round(Math.max(0, e.osszesBevetel - e.keret) * 0.40)) hibak.kulonado++;
+  }
+  allit('200 véletlen év: közterhek = tételes + kiegészítő + különadó', 'eltérés', 0, hibak.osszeg);
+  allit('200 véletlen év: adózott jövedelem = bevétel − költség − közterhek', 'eltérés', 0, hibak.adozott);
+  allit('200 véletlen év: nincs negatív adó', 'eltérés', 0, hibak.negativ);
+  allit('200 véletlen év: óvatos ≥ arányos ≥ kedvező', 'eltérés', 0, hibak.sorrend);
+  allit('200 véletlen év: különadó = a keret feletti rész 40%-a', 'eltérés', 0, hibak.kulonado);
+
+  /* ---- Kiírás ---------------------------------------------------------- */
+
+  var sorok = document.getElementById('sorok');
+  var bukott = 0;
+
+  esetek.forEach(function (e) {
+    var jo = e.vart === e.kapott;
+    if (!jo) bukott++;
+    var tr = document.createElement('tr');
+    tr.className = jo ? 'ok' : 'bukott';
+    tr.innerHTML =
+      '<td class="allapot">' + (jo ? '✓' : '✕') + '</td>' +
+      '<td>' + e.nev + '</td>' +
+      '<td><code>' + e.mezo + '</code></td>' +
+      '<td class="szam">' + e.vart + '</td>' +
+      '<td class="szam">' + e.kapott + '</td>';
+    sorok.appendChild(tr);
+  });
+
+  var osszegzes = document.getElementById('osszegzes');
+  osszegzes.className = bukott === 0 ? 'rendben' : 'hibas';
+  osszegzes.textContent = bukott === 0
+    ? esetek.length + ' ellenőrzés, mind rendben.'
+    : esetek.length + ' ellenőrzésből ' + bukott + ' megbukott.';
+  document.title = (bukott === 0 ? '✓ ' : '✕ ') + document.title;
+})();
+</script>
+
+</body>
+</html>

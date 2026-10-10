@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KATA-kalkulátor 2027 – Tamás Viktória</title>
+<meta name="description" content="Az új, 2027-től választható KATA éves terhei: tételes adó, a cégeknek számlázott bevétel utáni 15%-os kiegészítő adó és a keretösszeg feletti 40%-os különadó.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Montserrat:wght@400;600;700&family=Piazzolla:wght@400;700&display=swap&subset=latin-ext" rel="stylesheet">
+<link rel="stylesheet" href="../assets/viktoriawp.css">
+<style>
+  /* ---------- A kalkulátor saját elemei ---------- */
+
+  .kalk-lead { max-width: 60ch; }
+
+  /* A tervezet-jelzés a beágyazott módban is látszik (nem `kalk-csak-onalloan`), mert ott a
+     hero rejtve van — a figyelmeztetés viszont nem maradhat le. */
+  .kalk-tervezet {
+    margin: 0 0 34px;
+    padding: 14px 18px;
+    border-left: 3px solid var(--vwp-primary);
+    background: var(--vwp-lavender);
+    border-radius: 0 var(--vwp-radius-btn) var(--vwp-radius-btn) 0;
+    font-size: 14px;
+    line-height: 1.55;
+    max-width: 80ch;
+  }
+  .kalk-tervezet strong { color: var(--vwp-ink); }
+
+  .kalk-munkaterulet {
+    display: grid;
+    gap: 40px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  /* A töréspont azért 780px és nem 900, mert a honlap bejegyzéssávja 832px széles: ott is
+     kétoszlopos elrendezést akarunk. A 780–1023px sávban szűkebb margó és kisebb betű kell
+     hozzá — lásd lentebb. */
+  @media (max-width: 779px) {
+    .kalk-munkaterulet { grid-template-columns: minmax(0, 1fr); gap: 30px; }
+  }
+
+  /* Mezőcsoportok */
+  .kalk-mezok { display: grid; gap: 18px; }
+  .kalk-mezok--parban { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+
+  .kalk-sug {
+    display: block;
+    margin-top: 5px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--vwp-text);
+  }
+
+  .kalk-input--fo { font-size: 22px; font-weight: 600; padding: 14px 16px; }
+
+  /* Jelölőnégyzetek és rádiógombok */
+  .kalk-kapcsolo { display: flex; gap: 11px; align-items: flex-start; }
+  .kalk-kapcsolo input { margin: 4px 0 0; width: 18px; height: 18px; accent-color: var(--vwp-primary); flex: none; }
+  .kalk-kapcsolo label { font-size: 15px; font-weight: 600; color: var(--vwp-ink); cursor: pointer; }
+  .kalk-kapcsolo label .kalk-sug { font-weight: 400; }
+
+  /* ---------- Összecsukható szakaszok ----------
+     A becsukott szakasz helyet spórol, de nem rejthet el információt: a fejléc mindig
+     kiírja az aktuális beállítást. A mentes hónapok például a keretösszeget is csökkentik —
+     ha ez láthatatlanul dőlne el, rossz számot kapna, aki nem nyitja ki. */
+
+  .kalk-szakasz { border-top: 1px solid var(--vwp-border); }
+  .kalk-szakasz:last-of-type { border-bottom: 1px solid var(--vwp-border); }
+
+  .kalk-szakasz > summary {
+    display: flex;
+    align-items: center;
+    gap: 8px 14px;
+    flex-wrap: wrap;
+    padding: 17px 4px 17px 0;
+    cursor: pointer;
+    list-style: none;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--vwp-ink);
+  }
+  .kalk-szakasz > summary::-webkit-details-marker { display: none; }
+  .kalk-szakasz > summary:focus-visible { outline: 2px solid var(--vwp-primary); outline-offset: 3px; }
+
+  /* A `min-width: 0` nem elhagyható: a flex elemek alapértelmezett `min-width: auto`-ja
+     miatt az állapotszöveg nem tudna a tartalmánál keskenyebbre tördelődni, és keskeny
+     kijelzőn kilógna a fejlécből. */
+  .kalk-szakasz__allapot {
+    margin-left: auto;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--vwp-text);
+    text-align: right;
+  }
+
+  /* Nyíl vonalakból, nem betűből: így nem múlik a betűkészlet jelkészletén. */
+  .kalk-szakasz > summary::after {
+    content: '';
+    flex: none;
+    box-sizing: content-box;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--vwp-primary);
+    border-bottom: 2px solid var(--vwp-primary);
+    transform: translateY(-2px) rotate(45deg);
+    transition: transform .15s ease;
+  }
+  .kalk-szakasz[open] > summary::after { transform: translateY(2px) rotate(-135deg); }
+
+  .kalk-szakasz__tartalom { padding-bottom: 26px; }
+
+  /* ---------- Eredménykártya ---------- */
+
+  .kalk-eredmeny {
+    background: var(--vwp-lavender);
+    border-radius: var(--vwp-radius-card);
+    padding: 36px 34px;
+    position: sticky;
+    top: 90px;
+  }
+  @media (max-width: 779px) { .kalk-eredmeny { position: static; padding: 28px 24px; } }
+
+  .kalk-fooszeg__cimke {
+    font-family: var(--vwp-font-accent);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--vwp-primary);
+  }
+  .kalk-fooszeg__ertek {
+    font-family: var(--vwp-font-display);
+    font-size: 46px;
+    line-height: 1.15;
+    color: var(--vwp-ink);
+    font-variant-numeric: tabular-nums;
+    margin: 2px 0 0;
+  }
+  @media (max-width: 480px) { .kalk-fooszeg__ertek { font-size: 34px; } }
+
+  .kalk-tetelek { margin: 26px 0 0; }
+  .kalk-tetelek h3 {
+    font-family: var(--vwp-font-body);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--vwp-primary);
+    margin: 0 0 10px;
+  }
+  .kalk-tetelek + .kalk-tetelek { border-top: 1px solid var(--vwp-border); padding-top: 22px; margin-top: 22px; }
+
+  .kalk-sor {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 5px 0;
+    font-size: 15px;
+  }
+  /* A `display: flex` erősebb a böngésző `[hidden]`-szabályánál, ezért a rejtett sort külön
+     el kell tüntetni — különben a „0 Ft"-os sorok is látszanának. */
+  .kalk-sor[hidden] { display: none; }
+  .kalk-sor span:last-child { font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 600; color: var(--vwp-ink); }
+  .kalk-sor--kiemelt { font-weight: 700; }
+  .kalk-sor--kiemelt span:first-child { color: var(--vwp-ink); }
+  .kalk-sor--halvany span { color: var(--vwp-text); font-weight: 400; }
+  /* A határidők szöveges értékek: a szűk, beágyazott oszlopban egymás mellett mindkét fél
+     csúnyán törne, ezért a megnevezés fölé kerül az érték. */
+  .kalk-sor--szoveg { flex-direction: column; gap: 0; }
+  .kalk-sor--szoveg span:last-child { white-space: normal; font-variant-numeric: normal; }
+
+  .kalk-megjegyzes {
+    margin: 22px 0 0;
+    padding: 14px 16px;
+    background: #fff;
+    border-radius: var(--vwp-radius-btn);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .kalk-megjegyzes strong { color: var(--vwp-primary); }
+  .kalk-megjegyzes p { margin: 0; }
+  .kalk-megjegyzes p + p { margin-top: 8px; }
+  .kalk-megjegyzes:empty { display: none; }
+
+  .kalk-muveletek { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+  .kalk-muveletek .vwp-btn { padding: 12px 20px; }
+
+  .kalk-jogi { font-size: 13px; line-height: 1.6; color: var(--vwp-text); max-width: 80ch; }
+
+  /* Szűk kétoszlopos sáv: a honlapba ágyazva ~376px jut egy oszlopra. Szűkebb belső margóval
+     és egy fokkal kisebb betűvel kevesebb tételnév törik két sorba. A blokknak a fenti
+     alapértékek UTÁN kell állnia, különben azok írnák felül (a médialekérdezés nem növeli
+     a specifikusságot). */
+  @media (min-width: 780px) and (max-width: 1023px) {
+    .kalk-munkaterulet { gap: 26px; }
+    .kalk-eredmeny { padding: 28px 22px; }
+    .kalk-fooszeg__cimke { font-size: 16px; }
+    .kalk-fooszeg__ertek { font-size: 36px; }
+    .kalk-tetelek h3 { font-size: 12px; }
+    .kalk-sor { font-size: 14px; }
+  }
+
+  /* ---------- Beágyazott (?embed=1) mód ---------- */
+
+  .beagyazva .kalk-csak-onalloan { display: none; }
+  .beagyazva body { background: transparent; padding-bottom: 8px; }
+  .beagyazva .kalk-fo { padding-block: 0; }
+  .beagyazva .kalk-eredmeny { top: 10px; }
+
+  /* ---------- Nyomtatás ---------- */
+
+  @media print {
+    .vwp-header, .vwp-footer, .kalk-muveletek { display: none !important; }
+    .kalk-munkaterulet { grid-template-columns: 1fr; }
+    .kalk-eredmeny { position: static; background: #fff; border: 1px solid var(--vwp-border); }
+    .kalk-tervezet { background: #fff; }
+    .vwp-section { padding-block: 0; }
+    a { text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="vwp-header kalk-csak-onalloan">
+  <div class="vwp-header__inner">
+    <a class="vwp-logo" href="https://viktoriawp.eu/">Tamás Viktória</a>
+    <nav class="vwp-nav">
+      <a href="https://viktoriawp.eu/">Főoldal</a>
+      <a href="https://viktoriawp.eu/blog/">Blog</a>
+      <a href="../" aria-current="page">Kalkulátorok</a>
+      <a href="https://viktoriawp.eu/kapcsolat/">Kapcsolat</a>
+    </nav>
+  </div>
+</header>
+
+<section class="vwp-section kalk-csak-onalloan" style="padding-bottom:0;">
+  <div class="vwp-container">
+    <span class="vwp-eyebrow">Kalkulátorok</span>
+    <h1>KATA-kalkulátor 2027</h1>
+    <p class="kalk-lead">
+      Az új, 2027-től választható KATA egész évi terhei: a havi tételes adó, a cégeknek számlázott
+      bevétel utáni 15%-os kiegészítő adó és a keretösszeg feletti 40%-os különadó — főfoglalkozású
+      és nem főfoglalkozású kisadózóra.
+    </p>
+  </div>
+</section>
+
+<section class="vwp-section kalk-fo">
+  <div class="vwp-container">
+
+    <p class="kalk-tervezet">
+      <strong>Tervezet alapján számol.</strong> A szabályok a kisadózó egyéni vállalkozók tételes
+      adójáról szóló törvényjavaslat
+      <a href="https://kormany.hu/dokumentumtar/tarsadalmi-egyeztetes-a-kisadozo-egyeni-vallalkozok-teteles-adojarol-szolo-torvenyjavaslatrol" target="_blank" rel="noopener">2026. október 6-án társadalmi egyeztetésre bocsátott szövegéből</a>
+      származnak. Az elfogadott törvény ettől eltérhet.
+    </p>
+
+    <div class="kalk-munkaterulet">
+
+      <!-- ---------------- Űrlap ---------------- -->
+      <form id="urlap" autocomplete="off">
+
+        <div class="kalk-mezok">
+          <div>
+            <label class="vwp-label" for="kifizetoi">Éves bevétel cégektől, szervezetektől</label>
+            <input class="vwp-input kalk-input--fo" id="kifizetoi" name="kifizetoi" type="text"
+                   inputmode="numeric" value="10 000 000" aria-describedby="kifizetoiSug">
+            <span class="kalk-sug" id="kifizetoiSug">
+              Forintban, áfa nélkül: cégtől, szervezettől, egyéni vállalkozótól vagy külföldi kifizetőtől
+              kapott bevétel. Erre jár a 15%-os kiegészítő adó.
+            </span>
+          </div>
+
+          <div>
+            <label class="vwp-label" for="magan">Éves bevétel magánszemélyektől</label>
+            <input class="vwp-input kalk-input--fo" id="magan" name="magan" type="text"
+                   inputmode="numeric" value="4 000 000" aria-describedby="maganSug">
+            <span class="kalk-sug" id="maganSug">
+              Forintban, áfa nélkül. A keretösszegbe beszámít, kiegészítő adó nincs rá.
+            </span>
+          </div>
+
+          <div>
+            <label class="vwp-label" for="jelleg">Kisadózói jogállás</label>
+            <select class="vwp-select" id="jelleg" name="jelleg">
+              <option value="foallasu" selected>Főfoglalkozású – havi 100 000 Ft</option>
+              <option value="mellek">Nem főfoglalkozású – havi 50 000 Ft</option>
+            </select>
+            <span class="kalk-sug">
+              Nem főfoglalkozású például, aki a hónap egészében legalább heti 36 órás munkaviszonyban áll,
+              nappali tagozaton tanul, vagy kiegészítő tevékenységet folytat (például saját jogú nyugdíjas).
+              Ő a KATA alapján nem biztosított.
+            </span>
+          </div>
+        </div>
+
+        <details class="kalk-szakasz" id="idoSzakasz" style="margin-top:34px;">
+          <summary>
+            <span>Adóalanyiság időtartama</span>
+            <span class="kalk-szakasz__allapot" id="idoAllapot">Egész év</span>
+          </summary>
+
+          <div class="kalk-mezok kalk-mezok--parban kalk-szakasz__tartalom">
+            <div>
+              <label class="vwp-label" for="katasHonapok">Katás hónapok az évben</label>
+              <select class="vwp-select" id="katasHonapok" name="katasHonapok"></select>
+              <span class="kalk-sug">
+                Minden megkezdett hónapra a teljes tételes adó jár. Év közbeni kezdésnél a keretösszeg is
+                arányosan kisebb.
+              </span>
+            </div>
+            <div>
+              <label class="vwp-label" for="mentesHonapok">Ebből mentes hónapok</label>
+              <input class="vwp-input" id="mentesHonapok" name="mentesHonapok" type="number" min="0" max="12" step="1" value="0">
+              <span class="kalk-sug">
+                Amelyek egészében például táppénzt, csecsemőgondozási díjat, gyermekgondozási díjat vagy
+                ápolási díjat kapsz, illetve bevétel nélkül szünetel a vállalkozás. Ezekre nincs tételes adó, de a keret is
+                kisebb lesz.
+              </span>
+            </div>
+          </div>
+        </details>
+
+        <details class="kalk-szakasz" id="megrendeloSzakasz">
+          <summary>
+            <span>Megrendelők</span>
+            <span class="kalk-szakasz__allapot" id="megrendeloAllapot">Nincs megadva</span>
+          </summary>
+
+          <div class="kalk-mezok kalk-szakasz__tartalom">
+            <div>
+              <label class="vwp-label" for="legnagyobb">A legnagyobb céges megrendelőtől kapott bevétel</label>
+              <input class="vwp-input" id="legnagyobb" name="legnagyobb" type="text" inputmode="numeric" value="0">
+              <span class="kalk-sug">
+                Éves összeg, a vele kapcsolt vállalkozásoktól kapott bevétellel együtt. Ha eléri a teljes
+                bevétel felét, az adóalanyiság az év utolsó napjával megszűnik.
+              </span>
+            </div>
+
+            <div class="kalk-kapcsolo">
+              <input type="checkbox" id="voltMunkaltato" name="voltMunkaltato">
+              <label for="voltMunkaltato">A munkáltatómnak vagy két éven belüli volt munkáltatómnak is számlázok
+                <span class="kalk-sug">Ez az adóalanyiságot már a bevétel megszerzését megelőző nappal megszünteti.</span>
+              </label>
+            </div>
+          </div>
+        </details>
+
+        <details class="kalk-szakasz" id="koltsegSzakasz">
+          <summary>
+            <span>Költségek</span>
+            <span class="kalk-szakasz__allapot" id="koltsegAllapot">Nincs</span>
+          </summary>
+
+          <div class="kalk-mezok kalk-szakasz__tartalom">
+            <div>
+              <label class="vwp-label" for="koltseg">Éves költség</label>
+              <input class="vwp-input" id="koltseg" name="koltseg" type="text" inputmode="numeric" value="0">
+              <span class="kalk-sug">
+                A KATA-ban a költség nem csökkenti az adót. Itt csak azt mutatja, mennyi marad a költségek
+                és a közterhek után.
+              </span>
+            </div>
+          </div>
+        </details>
+
+        <details class="kalk-szakasz" id="ertelmezesSzakasz">
+          <summary>
+            <span>A keret feletti rész értelmezése</span>
+            <span class="kalk-szakasz__allapot" id="ertelmezesAllapot">Óvatos</span>
+          </summary>
+
+          <div class="kalk-mezok kalk-szakasz__tartalom">
+            <p class="kalk-sug" style="margin:0;">
+              A tervezet 8. § (5) bekezdése szerint a keretösszeg feletti bevételrészre nem jár kiegészítő
+              adó, de nem rendezi, hogy vegyes bevételnél ez a céges vagy a magánszemélyektől származó
+              bevételt csökkenti-e. A választás csak akkor számít, ha a bevétel meghaladja a keretet, és
+              magánszemélyektől is van bevétel.
+            </p>
+
+            <div class="kalk-kapcsolo">
+              <input type="radio" id="ertOvatos" name="ertelmezes" value="ovatos" checked>
+              <label for="ertOvatos">Óvatos
+                <span class="kalk-sug">A 15% alapja a céges bevétel, legfeljebb a keretösszegig. Ez adja a legmagasabb adót.</span>
+              </label>
+            </div>
+            <div class="kalk-kapcsolo">
+              <input type="radio" id="ertAranyos" name="ertelmezes" value="aranyos">
+              <label for="ertAranyos">Arányos
+                <span class="kalk-sug">A keret feletti rész a céges és a magánbevétel arányában csökkenti az alapot.</span>
+              </label>
+            </div>
+            <div class="kalk-kapcsolo">
+              <input type="radio" id="ertKedvezo" name="ertelmezes" value="kedvezo">
+              <label for="ertKedvezo">Kedvező
+                <span class="kalk-sug">A keret feletti rész teljes egészében a céges bevételből vonódik le.</span>
+              </label>
+            </div>
+          </div>
+        </details>
+      </form>
+
+      <!-- ---------------- Eredmény ---------------- -->
+      <div class="kalk-eredmeny" id="eredmeny" aria-live="polite">
+        <div class="kalk-fooszeg">
+          <span class="kalk-fooszeg__cimke" id="fooCimke">Közterhek után marad egy évben</span>
+          <p class="kalk-fooszeg__ertek" id="fooEredmeny">–</p>
+        </div>
+
+        <div class="kalk-tetelek">
+          <h3>Éves bevétel</h3>
+          <div class="kalk-sor"><span>Cégektől, szervezetektől</span><span id="sorKifizetoi">–</span></div>
+          <div class="kalk-sor"><span>Magánszemélyektől</span><span id="sorMagan">–</span></div>
+          <div class="kalk-sor kalk-sor--kiemelt"><span>Bevétel összesen</span><span id="sorOsszes">–</span></div>
+          <div class="kalk-sor kalk-sor--halvany" id="sorKoltsegSor"><span>Költségek</span><span id="sorKoltseg">–</span></div>
+        </div>
+
+        <div class="kalk-tetelek">
+          <h3>Éves közterhek</h3>
+          <div class="kalk-sor"><span id="sorTetelesCimke">Tételes adó</span><span id="sorTeteles">–</span></div>
+          <div class="kalk-sor"><span>Kiegészítő adó (15%)</span><span id="sorKieg">–</span></div>
+          <div class="kalk-sor"><span>Különadó (40%)</span><span id="sorKulon">–</span></div>
+          <div class="kalk-sor kalk-sor--kiemelt"><span>Közterhek összesen</span><span id="sorKozterhek">–</span></div>
+          <div class="kalk-sor kalk-sor--halvany"><span>A bevétel arányában</span><span id="sorHatekony">–</span></div>
+        </div>
+
+        <div class="kalk-tetelek">
+          <h3>Keretek</h3>
+          <div class="kalk-sor"><span id="sorKeretCimke">Keretösszeg</span><span id="sorKeret">–</span></div>
+          <div class="kalk-sor kalk-sor--halvany" id="sorTullepesSor"><span>Ebből túllépve</span><span id="sorTullepes">–</span></div>
+          <div class="kalk-sor"><span>Céges bevétel, ameddig nincs kiegészítő adó</span><span id="sorKuszob">–</span></div>
+        </div>
+
+        <div class="kalk-tetelek">
+          <h3>Tájékoztató</h3>
+          <div class="kalk-sor"><span>Ellátások alapja havonta</span><span id="sorEllatas">–</span></div>
+          <div class="kalk-sor"><span>Jövedelem jövedelemigazoláson (60%)</span><span id="sorIgazolt">–</span></div>
+          <div class="kalk-sor" id="sorTartalekSor"><span>Havonta félreteendő a kiegészítő és a különadóra</span><span id="sorTartalek">–</span></div>
+        </div>
+
+        <div class="kalk-tetelek">
+          <h3>Határidők</h3>
+          <div class="kalk-sor kalk-sor--szoveg"><span>Tételes adó</span><span>havonta, a következő hónap 12-éig</span></div>
+          <div class="kalk-sor kalk-sor--szoveg"><span>Kiegészítő adó és különadó</span><span>a következő év február 25-éig</span></div>
+        </div>
+
+        <div class="kalk-megjegyzes" id="megjegyzes"></div>
+
+        <div class="kalk-muveletek">
+          <button type="button" class="vwp-btn vwp-btn--outline" id="masol">Eredmény másolása</button>
+          <button type="button" class="vwp-btn vwp-btn--outline" id="nyomtat">Nyomtatás</button>
+        </div>
+      </div>
+
+    </div>
+
+    <hr class="vwp-divider" style="margin-top:50px;">
+    <p class="kalk-jogi">
+      A kalkulátor tájékoztató jellegű. A 2027-re javasolt szabályok szerint számol, a törvényjavaslat
+      2026. október 6-án társadalmi egyeztetésre bocsátott szövege alapján, ezért az elfogadott törvény
+      eltérhet tőle. Feltételezi, hogy a kisadózói jogállás (főfoglalkozású vagy nem főfoglalkozású) az
+      egész évben azonos. Nem veszi figyelembe az áfát, a foglalkoztatottak utáni közterheket, a 2026-ban
+      már katás vállalkozók átmeneti szabályait és az adóalanyiság év közbeni megszűnését, ezért nem
+      helyettesíti a könyvelést. Készítette: Tamás Viktória.
+    </p>
+  </div>
+</section>
+
+<footer class="vwp-footer kalk-csak-onalloan">
+  <div class="vwp-container">
+    <div style="display:flex;flex-wrap:wrap;gap:30px;justify-content:space-between;">
+      <nav style="display:flex;gap:20px;flex-wrap:wrap;">
+        <a href="https://viktoriawp.eu/">Főoldal</a>
+        <a href="https://viktoriawp.eu/blog/">Blog</a>
+        <a href="../">Kalkulátorok</a>
+        <a href="https://viktoriawp.eu/kapcsolat/">Kapcsolat</a>
+      </nav>
+    </div>
+    <div class="vwp-footer__bottom">
+      <span>Készítette: Tamás Viktória – Minden jog fenntartva!</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../assets/kata2027.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var beagyazva = new URLSearchParams(location.search).get('embed') === '1';
+  if (beagyazva) document.documentElement.classList.add('beagyazva');
+
+  var E = function (id) { return document.getElementById(id); };
+
+  /* ---------- Formázás ---------- */
+
+  function ft(n) {
+    return szamKent(Math.round(n)) + ' Ft';
+  }
+
+  function szamKent(n) {
+    return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  }
+
+  /* Előjel csak ott, ahol tényleg mozdul valami: a „− 0 Ft" félrevezető lenne. */
+  function levonas(n) {
+    return Math.round(n) === 0 ? ft(0) : '− ' + ft(n);
+  }
+
+  function szazalek(arany) {
+    return (arany * 100).toFixed(1).replace('.', ',') + '%';
+  }
+
+  function ertek(mezo) {
+    var tiszta = String(mezo.value).replace(/[^\d]/g, '');
+    return tiszta === '' ? 0 : parseInt(tiszta, 10);
+  }
+
+  /* Ezres tagolás gépelés közben, a kurzor helyének megőrzésével. */
+  function tagol(mezo) {
+    var elotteSzamjegy = String(mezo.value).slice(0, mezo.selectionStart || 0).replace(/[^\d]/g, '').length;
+    var szam = ertek(mezo);
+    mezo.value = szamKent(szam);
+    var uj = 0, latott = 0;
+    while (uj < mezo.value.length && latott < elotteSzamjegy) {
+      if (/\d/.test(mezo.value[uj])) latott++;
+      uj++;
+    }
+    if (mezo === document.activeElement) mezo.setSelectionRange(uj, uj);
+  }
+
+  /* ---------- A katás hónapok választója ---------- */
+
+  for (var h = 12; h >= 1; h--) {
+    var opcio = document.createElement('option');
+    opcio.value = h;
+    opcio.textContent = h === 12 ? '12 hónap – egész év' : h + ' hónap';
+    E('katasHonapok').appendChild(opcio);
+  }
+
+  /* ---------- Bemenet összeállítása ---------- */
+
+  function bemenet() {
+    var valasztott = document.querySelector('input[name="ertelmezes"]:checked');
+    return {
+      jelleg: E('jelleg').value,
+      katasHonapok: parseInt(E('katasHonapok').value, 10),
+      mentesHonapok: Math.max(0, parseInt(E('mentesHonapok').value, 10) || 0),
+      kifizetoiBevetel: ertek(E('kifizetoi')),
+      maganBevetel: ertek(E('magan')),
+      legnagyobbMegrendelo: ertek(E('legnagyobb')),
+      voltMunkaltato: E('voltMunkaltato').checked,
+      koltsegek: ertek(E('koltseg')),
+      ertelmezes: valasztott ? valasztott.value : 'ovatos'
+    };
+  }
+
+  /* ---------- Számítás és kiírás ---------- */
+
+  function frissit() {
+    var be = bemenet();
+    var e = KATA2027.szamol(be);
+
+    E('fooCimke').textContent = e.koltsegek > 0
+      ? 'Költségek és közterhek után marad egy évben'
+      : 'Közterhek után marad egy évben';
+    E('fooEredmeny').textContent = ft(e.adozottJovedelem);
+
+    E('sorKifizetoi').textContent = ft(e.kifizetoiBevetel);
+    E('sorMagan').textContent = ft(e.maganBevetel);
+    E('sorOsszes').textContent = ft(e.osszesBevetel);
+    E('sorKoltseg').textContent = levonas(e.koltsegek);
+    E('sorKoltsegSor').hidden = e.koltsegek === 0;
+
+    E('sorTetelesCimke').textContent = 'Tételes adó (' + e.fizetosHonapok + ' × ' + ft(e.haviTetel) + ')';
+    E('sorTeteles').textContent = levonas(e.tetelesAdo);
+    E('sorKieg').textContent = levonas(e.kiegeszitoAdo);
+    E('sorKulon').textContent = levonas(e.kulonado);
+    E('sorKozterhek').textContent = levonas(e.kozterhek);
+    E('sorHatekony').textContent = e.osszesBevetel > 0 ? szazalek(e.hatekonyKulcs) : '–';
+
+    E('sorKeretCimke').textContent = e.fizetosHonapok === 12
+      ? 'Keretösszeg'
+      : 'Keretösszeg (' + e.fizetosHonapok + ' hónapra arányosan)';
+    E('sorKeret').textContent = ft(e.keret);
+    E('sorTullepes').textContent = ft(e.tullepes);
+    E('sorTullepesSor').hidden = e.tullepes === 0;
+    E('sorKuszob').textContent = ft(e.kifizetoiKuszob);
+
+    E('sorEllatas').textContent = e.ellatasiAlap > 0 ? ft(e.ellatasiAlap) : 'nem biztosított';
+    E('sorIgazolt').textContent = ft(e.igazoltJovedelem);
+    E('sorTartalek').textContent = ft(e.haviTartalek);
+    E('sorTartalekSor').hidden = e.haviTartalek === 0;
+
+    megjegyzes(e);
+    szakaszAllapotok(be, e);
+    magassagotKuld();
+  }
+
+  /* ---------- A szakaszok fejlécében látszó állapot ----------
+     Enélkül a becsukott szakasz elrejtené a beállítást, és valaki úgy kaphatna rossz
+     eredményt, hogy észre sem veszi, hogy ott volt egy választás. */
+
+  function szakaszAllapotok(be, e) {
+    E('idoAllapot').textContent = e.katasHonapok === 12 && e.mentesHonapok === 0
+      ? 'Egész év'
+      : e.katasHonapok + ' hónap' + (e.mentesHonapok > 0 ? ', ebből ' + e.mentesHonapok + ' mentes' : '');
+
+    var megrendelo = [];
+    if (e.legnagyobbMegrendelo > 0) {
+      megrendelo.push('legnagyobb: ' + Math.round(e.megrendeloiArany * 100) + '%');
+    }
+    if (be.voltMunkaltato) megrendelo.push('volt munkáltató');
+    E('megrendeloAllapot').textContent = megrendelo.length ? megrendelo.join(' · ') : 'Nincs megadva';
+
+    E('koltsegAllapot').textContent = e.koltsegek > 0 ? ft(e.koltsegek) : 'Nincs';
+    E('ertelmezesAllapot').textContent = e.ertelmezes;
+  }
+
+  function megjegyzes(e) {
+    E('megjegyzes').innerHTML = e.figyelmeztetesek.map(function (f) {
+      return '<p>' + f.szoveg + '</p>';
+    }).join('');
+  }
+
+  /* ---------- Vágólap ---------- */
+
+  function osszefoglalo() {
+    var sorok = [];
+    document.querySelectorAll('.kalk-tetelek').forEach(function (blokk) {
+      sorok.push('');
+      sorok.push(blokk.querySelector('h3').textContent.toUpperCase());
+      blokk.querySelectorAll('.kalk-sor').forEach(function (sor) {
+        if (sor.hidden) return;
+        sorok.push(sor.children[0].textContent + ': ' + sor.children[1].textContent);
+      });
+    });
+
+    var megjegyzesek = [];
+    E('megjegyzes').querySelectorAll('p').forEach(function (p) { megjegyzesek.push('• ' + p.textContent); });
+    if (megjegyzesek.length) {
+      sorok.push('');
+      sorok.push('MEGJEGYZÉSEK');
+      sorok.push(megjegyzesek.join('\n'));
+    }
+
+    return 'KATA-kalkulátor 2027 (a 2026. október 6-i törvénytervezet alapján)\n' +
+      E('fooCimke').textContent + ': ' + E('fooEredmeny').textContent + '\n' +
+      sorok.join('\n') + '\n\nA számítás tájékoztató jellegű.';
+  }
+
+  /* ---------- Beágyazott mód: magasság a szülő oldalnak ---------- */
+
+  var utolsoMagassag = 0;
+  var magassagFigyelo = null;
+
+  /* A `documentElement.scrollHeight` sosem kisebb az iframe belmagasságánál, ezért ha egyszer
+     túl nagy értéket küldünk, az beragad: a szülő megnöveli a keretet, mi meg már a megnövelt
+     keretet mérjük vissza. A `body` magassága viszont a tartalmat követi, tehát vissza is tud
+     zsugorodni. */
+  function magassagotKuld() {
+    if (!beagyazva || !window.parent || window.parent === window) return;
+    var magassag = Math.ceil(document.body.getBoundingClientRect().height);
+    if (magassag === utolsoMagassag || magassag === 0) return;
+    utolsoMagassag = magassag;
+    window.parent.postMessage({ tipus: 'kalkulator-magassag', magassag: magassag }, '*');
+  }
+
+  /* ---------- Bekötés ---------- */
+
+  ['kifizetoi', 'magan', 'legnagyobb', 'koltseg'].forEach(function (id) {
+    var mezo = E(id);
+    tagol(mezo);
+    mezo.addEventListener('input', function () { tagol(mezo); frissit(); });
+  });
+
+  ['jelleg', 'katasHonapok', 'mentesHonapok', 'voltMunkaltato', 'ertOvatos', 'ertAranyos', 'ertKedvezo'].forEach(function (id) {
+    E(id).addEventListener('input', frissit);
+    E(id).addEventListener('change', frissit);
+  });
+
+  /* A mentes hónapok száma nem lehet több a katás hónapokénál. A motor ezt amúgy is
+     korlátozza, de a mezőben se maradjon olyan szám, amivel valójában nem számolunk. */
+  function mentesKorlat() {
+    var katas = E('katasHonapok').value;
+    E('mentesHonapok').max = katas;
+    if (parseInt(E('mentesHonapok').value, 10) > parseInt(katas, 10)) {
+      E('mentesHonapok').value = katas;
+      frissit();
+    }
+  }
+  E('katasHonapok').addEventListener('change', mentesKorlat);
+  E('mentesHonapok').addEventListener('change', mentesKorlat);
+
+  /* Minden szakasz nyitása-csukása megváltoztatja a lap magasságát. */
+  document.querySelectorAll('details').forEach(function (szakasz) {
+    szakasz.addEventListener('toggle', magassagotKuld);
+  });
+
+  /* Nyomtatáskor minden szakasz nyitva legyen, különben a beállítások lemaradnának a
+     papírról. Utána visszaáll az eredeti állapot. */
+  var nyomtatasElott = null;
+  window.addEventListener('beforeprint', function () {
+    nyomtatasElott = [];
+    document.querySelectorAll('details').forEach(function (szakasz) {
+      nyomtatasElott.push([szakasz, szakasz.open]);
+      szakasz.open = true;
+    });
+  });
+  window.addEventListener('afterprint', function () {
+    if (!nyomtatasElott) return;
+    nyomtatasElott.forEach(function (par) { par[0].open = par[1]; });
+    nyomtatasElott = null;
+  });
+
+  E('nyomtat').addEventListener('click', function () { window.print(); });
+
+  E('masol').addEventListener('click', function () {
+    var gomb = this;
+    var eredetiSzoveg = gomb.textContent;
+    navigator.clipboard.writeText(osszefoglalo()).then(function () {
+      gomb.textContent = 'Vágólapra másolva';
+      setTimeout(function () { gomb.textContent = eredetiSzoveg; }, 2000);
+    }, function () {
+      gomb.textContent = 'Nem sikerült';
+      setTimeout(function () { gomb.textContent = eredetiSzoveg; }, 2000);
+    });
+  });
+
+  window.addEventListener('resize', magassagotKuld);
+
+  /* A tartalom magassága a keret szélességétől és a betöltött betűktől is függ, nem csak az
+     ablak méretétől. A ResizeObserver ezt elvileg elkapja, de a gyakorlatban nem mindig
+     jelez, ha az iframe-et kívülről méretezik át — ezért mellé megy egy másodpercenkénti
+     ellenőrzés is. Üzenet csak akkor megy, ha a magasság tényleg változott. */
+  if (beagyazva) {
+    if (window.ResizeObserver) {
+      magassagFigyelo = new ResizeObserver(magassagotKuld);
+      magassagFigyelo.observe(document.body);
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(magassagotKuld);
+    setInterval(magassagotKuld, 1000);
+  }
+
+  frissit();
+})();
+</script>
+
+</body>
+</html>

@@ -13,11 +13,14 @@ adatok nem hagyják el a gépet.
 | [`index.html`](index.html) | Gyűjtő nyitóoldal, innen nyílnak a kalkulátorok |
 | [`ber-kalkulator/index.html`](ber-kalkulator/index.html) | Bér- és jövedelemkalkulátor 2026 |
 | [`atalanyado-kalkulator/index.html`](atalanyado-kalkulator/index.html) | Átalányadó-kalkulátor 2026 |
+| [`kata-kalkulator/index.html`](kata-kalkulator/index.html) | KATA-kalkulátor 2027 (a 2026. októberi törvénytervezet alapján) |
 | [`assets/szja2026.js`](assets/szja2026.js) | A bérszámítás motorja — a felülettől független, tesztelhető |
 | [`assets/atalanyado2026.js`](assets/atalanyado2026.js) | Az átalányadó motorja; a közös kedvezménykereteket az `szja2026.js`-ből veszi |
+| [`assets/kata2027.js`](assets/kata2027.js) | A KATA motorja; önálló, más motortól nem függ |
 | [`assets/viktoriawp.css`](assets/viktoriawp.css) | Az arculati CSS, változtatás nélkül |
 | [`teszt.html`](teszt.html) | Ellenőrző lap a bérmotorhoz; megnyitáskor lefut |
 | [`teszt-atalanyado.html`](teszt-atalanyado.html) | Ellenőrző lap az átalányadó-motorhoz |
+| [`teszt-kata.html`](teszt-kata.html) | Ellenőrző lap a KATA-motorhoz |
 | [`ikonok/index.html`](ikonok/index.html) | Ikontár: a bejegyzések kiemelt képeinek előnézete és letöltése |
 | [`ikonok/LEIRAT.md`](ikonok/LEIRAT.md) | Az ikontár részletes leirata: szabványok, rács, buktatók |
 | [`assets/ikonok/`](assets/ikonok/) | Az ikonok SVG-ben, mellettük a kész PNG-k |
@@ -127,6 +130,70 @@ változatlanok — csak a bevétel bontható hónapokra. Nem kezeli az áfát, a
 a szünetelést, a táppénzes és egyéb kieső időszakokat, a nem átalányadós jövedelmeket, sem az
 átalányadózásból év közben történő kilépést. Tájékoztató jellegű: nem helyettesíti a könyvelést.
 
+## KATA-kalkulátor 2027
+
+Az új KATA (a kisadózó egyéni vállalkozók tételes adója) **egész évi** terheit számolja,
+főfoglalkozású és nem főfoglalkozású kisadózóra. A szabályok a törvényjavaslat
+[2026. október 6-án társadalmi egyeztetésre bocsátott szövegéből](https://kormany.hu/dokumentumtar/tarsadalmi-egyeztetes-a-kisadozo-egyeni-vallalkozok-teteles-adojarol-szolo-torvenyjavaslatrol)
+származnak — **tervezet**, az elfogadott törvény eltérhet. Ezt a kalkulátor a beágyazott módban
+is látható sávban jelzi.
+
+Éves összegekből számol, mert a KATA-ban minden teher vagy havi fix összeg, vagy az éves
+bevételből adódik. Alapesetben két összeget kell megadni — a cégektől és a magánszemélyektől
+kapott bevételt — és a jogállást. Összecsukható szakaszban van az adóalanyiság időtartama
+(katás és mentes hónapok), a legnagyobb megrendelő és a volt munkáltató, a költség, és a
+8. § (5) értelmezése.
+
+### A számítás
+
+| Tétel | Szabály | Tervezet |
+|---|---|---|
+| Tételes adó | havi 100 000 Ft főfoglalkozásúnak, 50 000 Ft nem főfoglalkozásúnak, minden megkezdett hónapra | 7. § (1)–(2) |
+| Mentes hónap | amelyik egészében táppénz, CSED, GYED, ápolási díj stb., vagy bevétel nélküli szünetelés | 7. § (8)–(9) |
+| Keretösszeg | 22 000 000 Ft; ha nem minden hónapra kell tételes adót fizetni, a fizetős hónapok tizenkettede | 7. § (4)–(5) |
+| Különadó | a keret feletti bevételrész 40%-a; az adóalanyiság nem szűnik meg | 7. § (4) |
+| Kiegészítő adó | a cégektől (kifizetőtől) kapott bevétel 15%-a, csökkentve az évben fizetendő tételes adóval | 8. § (1)–(3) |
+| Ellátások alapja | 317 000 Ft/hó a főfoglalkozásúnak; a nem főfoglalkozású nem biztosított | 10. § (1)–(2) |
+| Jövedelemigazolás | a bevétel 60%-a | 10. § (4) |
+
+A kiegészítő adónak van egy küszöbe: amíg a céges bevétel 15%-a nem éri el az éves tételes
+adót, nincs pluszteher — egész éves főfoglalkozásúnál ez 8 000 000 Ft, nem főfoglalkozásúnál
+4 000 000 Ft céges bevétel.
+
+### A 8. § (5) — választható értelmezés
+
+A tervezet szerint a keret feletti bevételrészre nem jár kiegészítő adó, de nem rendezi, hogy
+vegyes bevételnél ez a céges vagy a magánszemélyektől származó részt csökkenti-e. A kalkulátor
+mindhármat tudja, alapból az óvatosat:
+
+| Értelmezés | A 15% alapja | 10 M magán + 20 M céges esetén |
+|---|---|---|
+| Óvatos | a céges bevétel, legfeljebb a keretig | 1 800 000 Ft |
+| Arányos | a céges bevétel × keret / összes bevétel | 1 000 000 Ft |
+| Kedvező | a céges bevétel − a keret feletti rész | 600 000 Ft |
+
+Ha csak céges bevétel van, vagy a bevétel a kereten belül marad, a három egybeesik — ilyenkor a
+kalkulátor nem is hozza szóba. Ha eltérnek, a megjegyzésben mindhárom összeg megjelenik.
+
+### Figyelmeztetések
+
+Csak olyat mond, ami a tervezet szövegéből következik, és hivatkozza a paragrafust: a keret
+túllépése, az 50%-os megrendelői szabály (az adóalanyiság az év végén megszűnik — 5. § (1) g)),
+a volt munkáltatónak számlázás (a bevétel előtti nappal megszűnik — 5. § (1) f)), a nem
+főfoglalkozású biztosításának hiánya, és ha a 8. § (5) értelmezése számít.
+
+### Amit nem tud
+
+Azt feltételezi, hogy a jogállás (főfoglalkozású vagy nem) az egész évben azonos. Nem kezeli az
+áfát, a foglalkoztatottak utáni közterheket, a 2026. december 31-én már katás vállalkozók átmeneti
+szabályait (a régi KATA 2027-ben havi 75 000 Ft-tal fut tovább), az adóalanyiság év közbeni
+megszűnését, és a 2028-tól a minimálbérhez kötött tételt. Tájékoztató jellegű: nem helyettesíti a
+könyvelést.
+
+**Ha a törvényt elfogadják:** a számok az [`assets/kata2027.js`](assets/kata2027.js) tetején,
+paragrafus-hivatkozással laknak. Az elfogadott szöveggel össze kell vetni őket, a 8. § (5)-öt
+különösen, és ha eldől az értelmezés, a választót meg lehet szüntetni.
+
 ## Beágyazás a honlapba
 
 A kalkulátor `?embed=1` paraméterrel fejléc, hero és lábléc nélkül, átlátszó háttérrel
@@ -155,7 +222,9 @@ kell lennie. Az átalányadó-kalkulátorhoz:
 ```
 
 A bérkalkulátorhoz ugyanez, `ber-kalkulator` azonosítóval, `ber-kalkulator/?embed=1` címmel és
-`height="1200"` tartalékkal.
+`height="1200"` tartalékkal. A KATA-kalkulátorhoz `kata-kalkulator` azonosítóval,
+`kata-kalkulator/?embed=1` címmel, „KATA-kalkulátor 2027” címkével és `height="1700"`
+tartalékkal (832 px-en csukott szakaszokkal ~1640 px).
 
 ### Miért kell a `<style>`
 
@@ -262,7 +331,7 @@ számokat lásd: [`ikonok/LEIRAT.md`](ikonok/LEIRAT.md).
 
 ## Ellenőrzés
 
-Mindkét motorhoz tartozik egy ellenőrző lap; megnyitáskor lefutnak, és a lap tetején látszik,
+Mindhárom motorhoz tartozik egy ellenőrző lap; megnyitáskor lefutnak, és a lap tetején látszik,
 hány ellenőrzés futott le és hány bukott meg (a böngészőfül címében is: `✓` vagy `✕`).
 
 [`teszt.html`](teszt.html) — a bérmotor. Kézzel kiszámolt eseteket futtat (minimálbér, 25 év
@@ -282,6 +351,14 @@ közterheket levonva pontosan a „marad" jön ki.
 **Figyelem az eltartottak megadására:** a Novitaxnál a „kedvezményezett" és a „figyelembe
 vehető" eltartott két külön, összeadódó szám; nálunk az `eltartott` a teljes létszám, a
 kedvezményezettekkel együtt. Összehasonlításkor a Novitaxban `felt = 0`-t kell megadni.
+
+[`teszt-kata.html`](teszt-kata.html) — a KATA-motor. A tervezetből vett konstansok, az
+allampapirkalkulator.hu tervezetelemzésének példái kézzel újraszámolva (14 M vegyes, 20 M és
+28 M csak céges, nem főfoglalkozású 6 M), a küszöbök, a 8. § (5) három értelmezése egy vegyes,
+kereten felüli esetre, az időarányos keret, a mentes hónapok és a figyelmeztetések. Mellette 200
+véletlen éven ellenőrzi, hogy a közterhek a tételek összege, az adózott jövedelem egyezik, nincs
+negatív adó, és az óvatos ≥ arányos ≥ kedvező sorrend mindig áll. Hivatalos kalkulátor, amivel
+kereszt-ellenőrizni lehetne, a tervezethez még nincs.
 
 ## Közzététel
 
