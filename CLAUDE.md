@@ -169,11 +169,20 @@ feltöltése a médiatárba.
 | Gyűjtőoldal | https://ludmilla90ludmilla-ai.github.io/kalkulatorok/ |
 | Bérkalkulátor | `.../kalkulatorok/ber-kalkulator/` · bejegyzés: https://viktoriawp.eu/ber-es-jovedelem-kalkulator-2026/ |
 | Átalányadó | `.../kalkulatorok/atalanyado-kalkulator/` · bejegyzés: https://viktoriawp.eu/atalanyado-kalkulator-2026/ |
+| KATA 2027 | `.../kalkulatorok/kata-kalkulator/` · bejegyzés: https://viktoriawp.eu/kata-kalkulator-2027/ |
 | Ikontár | `.../kalkulatorok/ikonok/` |
 
-Mindkét bejegyzés publikálva van, kiemelt képpel, a beágyazás ellenőrizve: a bejegyzéssávban
-832 px szélesek, a magasságot a script állítja (bér ~1100 px, átalányadó ~1516 px csukott
-szakaszokkal). A Pages általában egy percen belül frissül push után; érdemes megvárni és
+Mindhárom bejegyzés publikálva van, kiemelt képpel, a beágyazás ellenőrizve: a bejegyzéssávban
+832 px szélesek, a magasságot a script állítja (bér ~1100 px, átalányadó ~1516 px, KATA ~1640 px
+csukott szakaszokkal). A KATA-bejegyzés Gutenberg-kódja a `bejegyzesek/` mappában van; a szövegét
+a `viktoriawp-bejegyzes` skill menete szerint írtuk (tényösszesítő, vázlat, kód, élő ellenőrzés).
+
+**A KATA egy törvénytervezetre épül** (2026. október 6.). Ha a törvényt elfogadják, a
+`assets/kata2027.js` konstansait, a figyelmeztető szövegeket és a bejegyzés állításait is az
+elfogadott szöveggel kell összevetni — a 8. § (5)-öt különösen, mert ha az eldől, a felület
+értelmezés-választója megszüntethető. 2028-tól a tételes adó a minimálbérhez kötődik.
+
+A repó 2026-10-10 óta a `C:\Users\tamas\projects\kalkulatorok` mappában van (előtte a OneDrive-on). A Pages általában egy percen belül frissül push után; érdemes megvárni és
 visszaellenőrizni, mert a böngésző a régi CSS-t sokáig cache-eli.
 
 ## A honlapról, amit itt tanultunk
